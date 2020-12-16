@@ -1,0 +1,16 @@
+SysmonForLinux Prototype
+
+TODO
+
+* XML config -> internal representation for filters
+    DONE
+* Apply filters
+    DONE
+* Collect correct fields
+    DONE
+* Output correct fields
+    DONE
+* Add ProcessGuid and LogonGuid
+* Get ParentCommandLine from /proc - delayed
+* Convert UID to USER - delayed
+* Hash image - delayed

@@ -1,0 +1,15 @@
+# syscalls.rules
+# each line starts with the syscall number to log
+# followed by space-separated clauses
+# each clause can be an argument (a0 .. a5), an operator (=, <, >, &, |)
+# and a value (leading 0 for octal, 0x for hex)
+# OR can be the global P or V. P indicates all events generated for this
+# syscall number must correctly parse standard fields, and V indicates that
+# all events for this syscall number must correctly parse any syscall-specific
+# fields.
+# Operator & ANDs the argument and the value and checks the result equals
+# the value (&= in auditctl); and operator | ANDs the argument with the value
+# and checks the result is not 0 (& in auditctl).
+
+execve
+execveat
