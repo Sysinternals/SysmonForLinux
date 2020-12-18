@@ -473,11 +473,12 @@ static inline bool set_event_exit_info(event_s *event, void *task, void *p_task,
     event->auid = (uint32_t)deref_ptr(task, config->auid);
 //    event->ses = (uint32_t)deref_ptr(task, config->ses);
 
-/*
     if (!deref_string_into(event->tty, sizeof(event->tty), task, config->tty)){
         bpf_probe_read_str(event->tty, sizeof(event->tty), notty);
     }
-*/
+
+    event->task = task;
+    event->p_task = p_task;
 
     // get the creds
     cred = (void *)deref_ptr(task, config->cred);

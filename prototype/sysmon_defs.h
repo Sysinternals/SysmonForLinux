@@ -138,6 +138,7 @@ typedef struct e_rec {
     unsigned long int  code_bytes_start; //Always 0xdeadbeef = 3735928559
     unsigned int       version;
     unsigned long      bootns; // time since boot in nanoseconds, not including time when suspended
+    char               utcTime[32];
     unsigned int       status;
     unsigned long      syscall_id;
     unsigned long      a[8]; // Should only be 6 but this helps with verifier
@@ -162,7 +163,14 @@ typedef struct e_rec {
     unsigned int       egid;
     unsigned int       sgid;
     unsigned int       fsgid;
+    char               username[32];
     event_execve_s     execve;
+    event_execve_s     p_execve;
+    char               loginGuid[64];
+    char               processGuid[64];
+    char               p_processGuid[64];
+    void *             task;
+    void *             p_task;
 /*
     union {
         event_fileop_s fileop;

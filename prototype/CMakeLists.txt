@@ -61,7 +61,7 @@ find_package(LibXml2 2.0.0 REQUIRED)
 add_subdirectory(ebpf_loader)
 
 # make sysmon
-add_executable(sysmon sysmon.c parsexml.c)
+add_executable(sysmon sysmon.c parsexml.c outputxml.c)
 add_dependencies(sysmon ebpf_loader)
 target_link_libraries(sysmon ebpf_loader "${LIBXML2_LIBRARIES}")
 target_include_directories(sysmon PUBLIC

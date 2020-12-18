@@ -22,7 +22,14 @@
 #include <syslog.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <utmpx.h>
 #include "parsexml.h"
+#include "outputxml.h"
 
 //Notes:
 //https://github.com/vmware/p4c-xdp/issues/58
@@ -41,9 +48,12 @@ unsigned long num_fail = 0;
 unsigned long num_parsev = 0;
 struct utsname uname_data;
 
+uint32_t machineId = 0;
+
 bool o_syslog = false;
 bool quiet = false;
 bool superquiet = false;
+bool xmloutput = true;
 
 char *hashAlgorithms = NULL;
 RuleGroupPtr ruleGroupsHead = NULL;
@@ -181,6 +191,104 @@ bool checkRuleGroupMatch(RuleGroupPtr ruleGroup, event_s *event)
     return match;
 }
 
+void read_parent_cmdline(event_s *e)
+{
+    int fd;
+    char p_cmdline[64];
+    ssize_t num_read;
+
+    snprintf(p_cmdline, sizeof(p_cmdline), "/proc/%d/cmdline", e->ppid);
+
+    fd = open(p_cmdline, O_RDONLY);
+    if (fd <= 0)
+        return;
+
+    num_read = read(fd, e->p_execve.cmdline, sizeof(e->p_execve.cmdline));
+    e->p_execve.cmdline_size = num_read;
+    e->p_execve.cmdline[num_read] = 0;
+
+    close(fd);
+
+    fix_cmdline(&e->p_execve);
+}
+
+void makeGuid(char *d, uint32_t timestamp, uint64_t id)
+{
+    unsigned char guid[16];
+
+    *(uint32_t *)guid = machineId;
+    *(uint32_t *)(guid + 4) = timestamp;
+    *(uint64_t *)(guid + 8) = id;
+
+    sprintf(d, "%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
+        *(uint32_t *)guid,
+        *(uint16_t *)(guid + 4),
+        *(uint16_t *)(guid + 6),
+        *(unsigned char *)(guid +  8),
+        *(unsigned char *)(guid +  9),
+        *(unsigned char *)(guid + 10),
+        *(unsigned char *)(guid + 11),
+        *(unsigned char *)(guid + 12),
+        *(unsigned char *)(guid + 13),
+        *(unsigned char *)(guid + 14),
+        *(unsigned char *)(guid + 15));
+}
+
+int32_t getLoginTime(char *tty, char *username)
+{
+    struct utmpx *r;
+    struct utmpx s;
+    int32_t t = 0;
+
+    strcpy(s.ut_line, tty);
+
+    setutxent();
+
+    while ((r = getutxline(&s)) != (struct utmpx *)NULL) {
+        if (!strcmp(r->ut_user, username)) {
+            t = r->ut_tv.tv_sec;
+        }
+    }
+
+    endutxent();
+
+    return t;
+}
+
+uint32_t uptime()
+{
+    int fd;
+    char u[128];
+    int num_read;
+    uint32_t t = 0;
+
+    fd = open("/proc/uptime", O_RDONLY);
+
+    if (fd > 0) {
+        num_read = read(fd, u, 128);
+        if (num_read > 0) {
+            t = atoi(u);
+        }
+        close(fd);
+    }
+
+    return t;
+}
+
+void fix_tty(char *t)
+{
+    char p[TTYSIZE];
+
+    if (!strncmp(t, "pts", 3)) {
+        if (t[3] != '/') {
+            strcpy(p, t+3);
+            t[3] = '/';
+            strcpy(t+4, p);
+        }
+    }
+}
+
+
 static void print_bpf_output(void *ctx, int cpu, void *data, __u32 size)
 {
     char e_buf[EVENT_BUFFER_SIZE];
@@ -190,19 +298,20 @@ static void print_bpf_output(void *ctx, int cpu, void *data, __u32 size)
     char buf2[EVENT_BUF2_SIZE];
     bool filter = false;
     event_s event;
-
     struct timeval now;
-    char date[32];
+    struct passwd *user;
+    uint32_t loginTime = 0;
 
     gettimeofday(&now, NULL);
     struct tm *t = gmtime(&now.tv_sec);
 
-    strftime(date, sizeof(date), "%m/%d/%Y %I:%M:%S", t);
-    sprintf(date + 19, ".%03ld", now.tv_usec / 1000);
-    strftime(date + 23, sizeof(date - 23), " %p", t);
+    memcpy(&event, data, sizeof(event));
+
+    strftime(event.utcTime, sizeof(event.utcTime), "%m/%d/%Y %I:%M:%S", t);
+    sprintf(event.utcTime + 19, ".%03ld", now.tv_usec / 1000);
+    strftime(event.utcTime + 23, sizeof(event.utcTime - 23), " %p", t);
 
     total_events++;
-    memcpy(&event, data, sizeof(event));
     if ( (size > sizeof(event_s)) && // make sure we have enough data
          (event.code_bytes_start == CODE_BYTES) && // garbage check...
          (event.code_bytes_end == CODE_BYTES) && // garbage check...
@@ -285,20 +394,36 @@ static void print_bpf_output(void *ctx, int cpu, void *data, __u32 size)
 
                 fix_cmdline(&event.execve);
 
+                read_parent_cmdline(&event);
+
+                user = getpwuid(event.auid);
+                if (user) {
+                    snprintf(event.username, sizeof(event.username), "%s", user->pw_name);
+                    fix_tty(event.tty);
+                    loginTime = getLoginTime(event.tty, event.username);
+                    makeGuid(event.loginGuid, loginTime, *(uint64_t *)&user->pw_uid);
+                } else {
+                    event.username[0] = 0;
+                    makeGuid(event.loginGuid, uptime(), 0);
+                }
+
+                makeGuid(event.processGuid, now.tv_sec, (uint64_t)event.task);
+                makeGuid(event.p_processGuid, now.tv_sec, (uint64_t)event.p_task);
+
+
                 filter = false;
                 if (procCreateExclude && procCreateExclude->rulesHead) {
                     filter = checkRuleGroupMatch(procCreateExclude, &event);
                 }
                 if (!filter) {
-                    filter = false;
                     if (procCreateInclude && procCreateInclude->rulesHead) {
                         filter = !checkRuleGroupMatch(procCreateInclude, &event);
                     }
                 }
             
                 if (!filter) {
-                    snprintf(e_buf, EVENT_BUFFER_SIZE, "RuleName=\"*\", UtcTime=\"%s\", ProcessGuid=\"*\", ProcessId=%u, Image=\"%s\", CommandLine=\"%s\", CurrentDirectory=\"%s\", User=\"*\", LogonId=%d, ProcessUserId=%d, ParentProcessGuid=\"*\", ParentProcessId=%u, ParentImage=\"%s\", ParentCommandLine=\"*\"\n",
-                        date, event.pid, event.exe, event.execve.cmdline, event.pwd, event.auid, event.uid, event.ppid, event.p_exe);
+                    snprintf(e_buf, EVENT_BUFFER_SIZE, "RuleName=\"*\", UtcTime=\"%s\", ProcessGuid=\"%s\", ProcessId=%u, Image=\"%s\", CommandLine=\"%s\", CurrentDirectory=\"%s\", User=\"%s\", LogonGuid=\"{%s}\", LogonId=%d, ProcessUserId=%d, ParentProcessGuid=\"%s\", ParentProcessId=%u, ParentImage=\"%s\", ParentCommandLine=\"%s\"\n",
+                        event.utcTime, event.processGuid, event.pid, event.exe, event.execve.cmdline, event.pwd, event.username, event.loginGuid, event.auid, event.uid, event.p_processGuid, event.ppid, event.p_exe, event.p_execve.cmdline);
                 }
 
                 break;
@@ -324,8 +449,12 @@ static void print_bpf_output(void *ctx, int cpu, void *data, __u32 size)
         }
         if (!quiet && !filter)
             printf("%s\n", e_buf);
-        if (o_syslog && !filter)
-            syslog(LOG_USER | LOG_INFO, "%s", e_buf);
+        if (o_syslog && !filter) {
+            if (xmloutput)
+                outputXml(&event);
+            else
+                syslog(LOG_USER | LOG_INFO, "%s", e_buf);
+        }
     } else {
         bad_events++;
         if (!quiet)
@@ -360,28 +489,76 @@ void intHandler(int code) {
     exit(0);
 }
 
+void setMachineId()
+{
+    int fd;
+    char raw[64];
+    int numread;
+
+    machineId = 0;
+
+    fd = open("/etc/machine-id", O_RDONLY);
+    if (fd > 0) {
+        numread = read(fd, raw, 64);
+        if (numread > 8) {
+            raw[8] = 0;
+            machineId = strtoul(raw, NULL, 16);
+        }
+        close(fd);
+    }
+    if (!machineId) {
+        machineId = gethostid();
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int c;
     char *filename = NULL;
+    bool out_xml = false;
+    bool out_raw = false;
 
     o_syslog = true;
     quiet = true;
     superquiet = true;
 
-    while ((c = getopt (argc, argv, "i:")) != -1) {
+    setMachineId();
+
+    while ((c = getopt (argc, argv, "i:RX")) != -1) {
         switch(c) {
             case 'i':
                 filename = optarg;
                 break;
+            case 'R':
+                out_raw = true;
+                break;
+            case 'X':
+                out_xml = true;
+                break;
             default:
-                printf("Usage: %s [-i configFile]\n\n", argv[0]);
+                printf("Usage: %s [-i configFile] [-R] [-X]\n\n    -R indicates RAW output\n    -X indicates XML output\n\n", argv[0]);
                 exit(1);
         }
     }
 
     if (!superquiet)
         printf("Sysmon v%d.%d\n\n", Sysmon_VERSION_MAJOR, Sysmon_VERSION_MINOR);
+
+    if (out_raw && out_xml) {
+        printf("Select raw output OR XML output\n");
+        exit(1);
+    }
+
+    if (out_raw) {
+        xmloutput = false;
+    } else {
+        xmloutput = true;
+    }
+
+    if (!filename) {
+        printf("You must specify a configuration file (-h for help)\n");
+        exit(1);
+    }
 
     if (!quiet && sizeof(event_s) > MAX_EVENT_SIZE) {
         printf("sizeof(event_s) == %ld > %d!\n", sizeof(event_s), MAX_EVENT_SIZE);
@@ -396,6 +573,8 @@ int main(int argc, char *argv[])
     if (o_syslog)
         openlog("sysmon", LOG_NOWAIT, LOG_USER);
     signal(SIGINT, intHandler);
+
+
 
     loadConfig(filename);
 
