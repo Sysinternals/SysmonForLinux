@@ -505,6 +505,9 @@ void loadConfig(char *filename)
 {
     xmlDoc *doc = NULL;
     xmlNode *root_element = NULL;
+    xmlXPathContextPtr xpathCtx = NULL;
+    xmlXPathObjectPtr xpathObj = NULL;
+    xmlNode *sysmonNode = NULL;
 
     LIBXML_TEST_VERSION
 
@@ -517,14 +520,23 @@ void loadConfig(char *filename)
 
     root_element = xmlDocGetRootElement(doc);
 
-    if (!strcmp(root_element->name, "Sysmon")) {
-        printf("Schema version '%s'\n", xmlGetProp(root_element, "schemaversion"));
-
-        parseSysmonTopLevel(doc, root_element->children);
-    } else {
-        printf("Missing Sysmon identifier\n");
+    xpathCtx = xmlXPathNewContext(doc);
+    if (!xpathCtx) {
+        printf("error: could not create xpath context\n");
         exit(1);
     }
+
+    xpathObj = xmlXPathEvalExpression("//Sysmon[1]", xpathCtx);
+    if (!xpathObj || !xpathObj->nodesetval || xpathObj->nodesetval->nodeNr < 1) {
+        printf("error: could not find Sysmon node\n");
+        exit(1);
+    }
+
+    sysmonNode = xpathObj->nodesetval->nodeTab[0];
+    printf("Schema version '%s'\n", xmlGetProp(sysmonNode, "schemaversion"));
+    parseSysmonTopLevel(doc, root_element->children);
+
+    exit(0);
 
 //    printTree();
 

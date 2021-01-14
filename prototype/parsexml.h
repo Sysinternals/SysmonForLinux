@@ -19,6 +19,8 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 
 /*
  *To compile this file using gcc you can type
