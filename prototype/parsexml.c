@@ -504,7 +504,6 @@ void printTree()
 void loadConfig(char *filename)
 {
     xmlDoc *doc = NULL;
-    xmlNode *root_element = NULL;
     xmlXPathContextPtr xpathCtx = NULL;
     xmlXPathObjectPtr xpathObj = NULL;
     xmlNode *sysmonNode = NULL;
@@ -517,8 +516,6 @@ void loadConfig(char *filename)
         printf("error: could not load config '%s'\n", filename);
         exit(1);
     }
-
-    root_element = xmlDocGetRootElement(doc);
 
     xpathCtx = xmlXPathNewContext(doc);
     if (!xpathCtx) {
@@ -534,9 +531,7 @@ void loadConfig(char *filename)
 
     sysmonNode = xpathObj->nodesetval->nodeTab[0];
     printf("Schema version '%s'\n", xmlGetProp(sysmonNode, "schemaversion"));
-    parseSysmonTopLevel(doc, root_element->children);
-
-    exit(0);
+    parseSysmonTopLevel(doc, sysmonNode->children);
 
 //    printTree();
 
