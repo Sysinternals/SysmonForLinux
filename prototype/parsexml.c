@@ -529,6 +529,12 @@ void loadConfig(char *filename)
         exit(1);
     }
 
+    if (doc->encoding) {
+        printf("encoding: '%s'\n", doc->encoding);
+    } else {
+        printf("no encoding\n");
+    }
+
     sysmonNode = xpathObj->nodesetval->nodeTab[0];
     printf("Schema version '%s'\n", xmlGetProp(sysmonNode, "schemaversion"));
     parseSysmonTopLevel(doc, sysmonNode->children);
