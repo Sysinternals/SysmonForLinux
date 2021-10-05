@@ -1,0 +1,31 @@
+Name:		sysmonforlinux
+Version:	@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@
+Release:	@PROJECT_VERSION_TWEAK@%{?dist}
+Summary:	A system monitor based on eBPF, ported from Windows, that outputs events to Syslog
+
+License:	MIT/GPL2
+URL:		https://github.com/Sysinternals
+
+%description
+A system monitor based on eBPF, ported from Windows, that outputs events to Syslog
+
+%install
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/%{_bindir}
+cp sysmon $RPM_BUILD_ROOT/%{_bindir}
+mkdir -p $RPM_BUILD_ROOT/usr/share/man/man8
+cp sysmon.8.gz $RPM_BUILD_ROOT/usr/share/man/man8
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%{_bindir}/sysmon
+/usr/share/man/man8/sysmon.8.gz
+
+%preun
+sysmon -accepteula -u
+
+%postun
+if [ -d /opt/sysmon ]; then rm -rf /opt/sysmon; fi
+
