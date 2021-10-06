@@ -24,8 +24,8 @@ project.
 ## Build
 ```
 cd
-git clone *repo*
-cd Sysmon/linux
+git clone --recurse-submodules https://github.com/Sysinternals/SysmonForLinux.git
+cd SysmonForLinux
 mkdir build
 cd build
 cmake ..
@@ -84,10 +84,10 @@ building the getOffsets module in the /opt/sysinternals/getOffsets directory.
 See the README.md in that directory for more information.
 
 ## Manual Page
-A man page for Sysmon can be found in the deb directory, and is installed by
-both deb and rpm packages.
+A man page for Sysmon can be found in the package directory, and is installed
+by both deb and rpm packages.
 
-Use 'find' on the deb directory to locate it manually.
+Use 'find' on the package directory to locate it manually.
 
 ## Output
 ```

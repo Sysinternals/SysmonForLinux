@@ -170,7 +170,7 @@ outputxml.c.
 * networkTracker.{cpp,h} - correlation engine for network events.
 * outputxml.{c,h} - output message formatter.
 
-### Sysmon For Linux ebpf\_kern
+### Sysmon For Linux ebpfKern
 
 There are a number (currently 6) eBPF source files, made up from programs and
 inline functions in 30+ source files.  The main source files are:
@@ -235,7 +235,7 @@ sysmonEVENT\_rawtp.c files. Current sources for non-syscall tracepoints are:
 * sysmonProcTerminated.c - sched/sched\_process\_exit.
 * sysmonTCPconnection\_4\_15.c - tcp/tcp\_set\_state (v4.15 only).
 * sysmonTCPconnection\_4\_15\_5\_5.c - inet/inet\_sock\_set\_state (<= v5.6).
-* sysmonTCPconnection\_5.6\_.c - inet/inet\_sock\_set\_state (>= v5.6).
+* sysmonTCPconnection\_5\_6\_.c - inet/inet\_sock\_set\_state (>= v5.6).
 * sysmonUDPsend.c - skb/consume\_skb.
 
 ## So You Want To Implement An Existing Event?
@@ -250,7 +250,7 @@ The process is broadly:
 
 * Identify the event you wish to add from the schema - run sysmon -s to see the
     event schema.
-* Identify the associated event struct in SysmonCommon/ioctlcmd.h.
+* Identify the associated event struct in sysmonCommon/ioctlcmd.h.
 * Identify the syscall(s) or tracepoint(s) that will provide information needed
     to complete the event struct. Check /sys/kernel/debug/tracing/events for
     the event classes and the actual events within them. Cat the format file to
@@ -258,7 +258,7 @@ The process is broadly:
 * Identify whether one or more pseudo-event types are needed or whether the
     existing event struct is suitable. Psuedo-event structs and EventTypes
     should be added to linuxTypes.h.
-* Make the eBPF program(s) that generate the telemetry in ebpf\_kern. Use the
+* Make the eBPF program(s) that generate the telemetry in ebpfKern. Use the
     format file from the event in /sys/kernel/debug/tracing/events to create a
     suitable input parameter struct.
 * Add the eBPF program(s) to the main eBPF source files.
@@ -277,14 +277,13 @@ This process can be best understood by analysing the following examples.
 ### Simple Example
 
 SysmonFileDelete is a good example of an existing event that only required a
-simple solution; it attaches to the unlink() and unlinkat() syscalls and fills
-in a SYSMON\_FILE\_DELETE struct. No pseudo-events or pseudo-syscalls are
+simple solution; it attaches to the unlink() syscall and fills in a
+SYSMON\_FILE\_DELETE struct. No pseudo-events or pseudo-syscalls are
 necessary. In the eBPF config in sysmonforlinux.c the programs are added to
-the unlink() and unlinkat() syscalls, and the File Delete event is set in
-SetActiveSyscalls() in sysmonforlinux.c to require these two syscalls. No
-correlation engine in required, nor any post processing. In handle\_event() in
-sysmonforlinux.c, the event simply hits the Default case and is dispatched
-directly to DispatchEvent().
+the unlink() syscall, and the File Delete event is set in SetActiveSyscalls()
+in sysmonforlinux.c to require this syscall. No correlation engine in required,
+nor any post processing. In handle\_event() in sysmonforlinux.c, the event
+simply hits the Default case and is dispatched directly to DispatchEvent().
 
 ### Slightly More Complex Example
 
@@ -339,7 +338,7 @@ eBPF programs.
 
 * eBPF code is heavily optimised during compilation so write simpler, more
     understandable code and let the compiler make it optimal.
-* Use the helpers in ebpf\_kern and in sysinternalsEBPF/ebpf\_kern. These have
+* Use the helpers in ebpfKern and in sysinternalsEBPF/ebpfKern. These have
     been tested fairly well and are believed to work correctly.
 * If you need functions to make your code more readable, inline them all. (See
     existing code for examples.)
