@@ -90,9 +90,13 @@ find_package(LibXml2 2.0.0 REQUIRED)
 #
 # source directories
 #
+if(SYSMON_ADO)
+set(SYSMON_COMMON_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../sysmonCommon/")
+set(SYSMON_TESTS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/../test/UnitTests/")
+else()
 set(SYSMON_COMMON_SOURCE_DIR "${CMAKE_SOURCE_DIR}/sysmonCommon/")
 set(SYSMON_TESTS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/sysmonCommon/UnitTests/")
-
+endif()
 
 #
 # make sysmon
@@ -203,7 +207,7 @@ add_custom_command(OUTPUT sysmonEBPFkern5.6-.rep
 set(EBPF_DEPENDS
                sysmon_defs.h
                linuxTypes.h
-               sysmonCommon/ioctlcmd.h
+               "${SYSMON_COMMON_SOURCE_DIR}/ioctlcmd.h"
                /opt/sysinternalsEBPF/ebpfKern/sysinternalsEBPF_helpers.c
                /opt/sysinternalsEBPF/ebpfKern/sysinternalsEBPF_common.h
                /opt/sysinternalsEBPF/ebpfKern/sysinternalsEBPFoffsets.h

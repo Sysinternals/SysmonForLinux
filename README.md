@@ -32,6 +32,19 @@ cmake ..
 make
 ```
 
+## (Build from Sysmon ADO internally)
+*This is only required when cloning from the Sysmon ADO. Most users can
+ignore this.*
+```
+cd
+git clone <Sysmon ADO>
+cd Sysmon/linux
+mkdir build
+cd build
+cmake -DSYSMON_ADO=1 ..
+make
+```
+
 ## Test
 ```
 ./sysmonUnitTests
