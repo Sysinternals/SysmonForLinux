@@ -1,4 +1,4 @@
-# Install ProcDump
+# Install Sysmon
 
 ## Ubuntu 18.04, 20.04 & 21.04
 #### 1. Register Microsoft key and feed
