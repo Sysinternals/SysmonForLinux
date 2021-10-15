@@ -1,4 +1,7 @@
-# Sysmon For Linux build and install instructions
+# Sysmon For Linux install and build instructions
+
+## Installation
+The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
 
 ## Dependencies
 For Ubuntu:
