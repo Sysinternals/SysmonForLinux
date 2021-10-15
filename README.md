@@ -1,5 +1,7 @@
 # Sysmon For Linux build and install instructions
 
+This project contains the code for build and installing [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) on Linux.
+
 ## Dependencies
 For Ubuntu:
 ```
