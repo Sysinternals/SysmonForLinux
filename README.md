@@ -95,7 +95,7 @@ sudo tail -f /var/log/syslog
 ```
 or more human-readable
 ```
-sudo tail -f /var/log/syslog | /opt/sysmon/sysmonLogView
+sudo tail -f /var/log/syslog | sudo /opt/sysmon/sysmonLogView
 ```
 
 SysmonLogView has options to filter the output to make it easy to identify
