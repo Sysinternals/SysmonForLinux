@@ -334,7 +334,7 @@ existing ones - these are written in a consistent manner that meets the
 requirements of the eBPF verifier. The following tips are offered to help write
 eBPF programs.
 
-### Coding Tips/var/log/syslog
+### Coding Tips
 
 * eBPF code is heavily optimised during compilation so write simpler, more
     understandable code and let the compiler make it optimal.
