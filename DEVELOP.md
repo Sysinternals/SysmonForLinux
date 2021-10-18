@@ -302,7 +302,7 @@ than malloc() and avoids potential memory leaks.)
 
 More complex examples are the network events. These require multiple
 tracepoints and/or information arriving split over multiple reports, and hence
-a corrleation engine (networkTracker). Because the information sent from eBPF
+a correlation engine (networkTracker). Because the information sent from eBPF
 doesn't match a Sysmon struct, a new pseudo-event struct, pseudo-event type,
 and pseudo-syscall were created. These are connected up in the config and
 SetActiveSyscalls() in sysmonforlinux.c.
@@ -334,7 +334,7 @@ existing ones - these are written in a consistent manner that meets the
 requirements of the eBPF verifier. The following tips are offered to help write
 eBPF programs.
 
-### Coding Tips
+### Coding Tips/var/log/syslog
 
 * eBPF code is heavily optimised during compilation so write simpler, more
     understandable code and let the compiler make it optimal.
