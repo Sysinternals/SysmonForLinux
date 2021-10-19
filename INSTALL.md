@@ -115,7 +115,7 @@ sudo wget -q -O /etc/yum.repos.d/microsoft-prod.repo https://packages.microsoft.
 
 #### 2. Install SysmonForLinux
 ```sh
-sudo yum install sysmonforlinux
+sudo dnf install sysmonforlinux
 ```
 
 ## CentOS 7
@@ -137,7 +137,7 @@ sudo rpm -Uvh https://packages.microsoft.com/config/centos/8/packages-microsoft-
 
 #### 2. Install SysmonForLinux
 ```sh
-sudo yum install sysmonforlinux
+sudo dnf install sysmonforlinux
 ```
 
 ## openSUSE 15
