@@ -831,7 +831,7 @@ void NetworkTracker::UdpProgramTermination(pid_t pid)
 // C wrappers for C++ methods.
 //
 //--------------------------------------------------------------------
-extern "C" struct NetworkTracker *NetworkTrackerInit(LONGLONG staleSeconds, LONGLONG checkSeconds)
+extern "C" NetworkTracker *NetworkTrackerInit(LONGLONG staleSeconds, LONGLONG checkSeconds)
 {
     NetworkTracker *n = new NetworkTracker(staleSeconds, checkSeconds);
     return n;
@@ -847,7 +847,7 @@ extern "C" pid_t NetworkTrackerSeenConnect(NetworkTracker *n, PSYSMON_EVENT_HEAD
     return n->SeenConnect(eventHdr);
 }
 
-extern "C" void NetworkTrackerSeenFullAccept(struct NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
+extern "C" void NetworkTrackerSeenFullAccept(NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
         unsigned short sourcePort, const BYTE *destAddr, unsigned short destPort, LONGLONG eventTime)
 {
     if (n == NULL || sourceAddr == NULL || destAddr == NULL) {
@@ -858,7 +858,7 @@ extern "C" void NetworkTrackerSeenFullAccept(struct NetworkTracker *n, bool IPv4
     n->SeenAccept(AddrAndPort(sourceAddr, IPv4, sourcePort), AddrAndPort(destAddr, IPv4, destPort), eventTime);
 }
 
-extern "C" bool NetworkTrackerSeenAccept(struct NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
+extern "C" bool NetworkTrackerSeenAccept(NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
         unsigned short sourcePort, BYTE *destAddr, unsigned short *destPort)
 {
     if (n == NULL || sourceAddr == NULL || destAddr == NULL) {
@@ -877,7 +877,7 @@ extern "C" bool NetworkTrackerSeenAccept(struct NetworkTracker *n, bool IPv4, co
     return false;
 }
 
-extern "C" void NetworkTrackerCloseAccept(struct NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
+extern "C" void NetworkTrackerCloseAccept(NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
         unsigned short sourcePort, const BYTE *destAddr, unsigned short destPort)
 {
     if (n == NULL || sourceAddr == NULL || destAddr == NULL) {
@@ -888,7 +888,7 @@ extern "C" void NetworkTrackerCloseAccept(struct NetworkTracker *n, bool IPv4, c
     n->CloseAccept(AddrAndPort(sourceAddr, IPv4, sourcePort), AddrAndPort(destAddr, IPv4, destPort));
 }
 
-extern "C" bool NetworkTrackerSeenUdpRecv(struct NetworkTracker *n, bool *IPv4, BYTE *sourceAddr,
+extern "C" bool NetworkTrackerSeenUdpRecv(NetworkTracker *n, bool *IPv4, BYTE *sourceAddr,
         unsigned short *sourcePort, BYTE *destAddr, unsigned short *destPort, pid_t pid, int fd)
 {
     if (n == NULL || sourceAddr == NULL || sourcePort == NULL || destAddr == NULL || destPort == NULL) {
@@ -908,7 +908,7 @@ extern "C" bool NetworkTrackerSeenUdpRecv(struct NetworkTracker *n, bool *IPv4, 
     return true;
 }
 
-extern "C" bool NetworkTrackerSeenUdpSend(struct NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
+extern "C" bool NetworkTrackerSeenUdpSend(NetworkTracker *n, bool IPv4, const BYTE *sourceAddr,
         unsigned short sourcePort, const BYTE *destAddr, unsigned short destPort, pid_t pid)
 {
     if (n == NULL || sourceAddr == NULL || destAddr == NULL) {
@@ -921,7 +921,7 @@ extern "C" bool NetworkTrackerSeenUdpSend(struct NetworkTracker *n, bool IPv4, c
     return n->SeenUdp(&p, pid);
 }
 
-extern "C" void NetworkTrackerUdpProgramTermination(struct NetworkTracker *n, pid_t pid)
+extern "C" void NetworkTrackerUdpProgramTermination(NetworkTracker *n, pid_t pid)
 {
     if (n == NULL) {
         fprintf(stderr, "NetworkTrackerUdpProgramTermination invalid params\n");
