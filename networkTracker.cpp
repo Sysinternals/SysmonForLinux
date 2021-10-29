@@ -24,6 +24,7 @@
 //====================================================================
 
 #include <string.h>
+#include <stdio.h>
 #include <dirent.h>
 #include "networkTracker.h"
 #include "linuxHelpers.h"
