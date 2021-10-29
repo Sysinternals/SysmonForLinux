@@ -191,7 +191,7 @@ BOOLEAN GetProcess(
     snprintf( pathFile, 32, "/proc/%d/cmdline", ProcessId );
     fp = fopen( pathFile, "rb" );
     if (fp == NULL) {
-        return NULL;
+        return false;
     }
     numRead = fread( cmdline, 1, (128 * 1024) - 1, fp );
     fclose( fp );
