@@ -449,9 +449,9 @@ void processCmdline(int argc, char *argv[],
                 }
                 printf("\n");
                 printf("Event Id Fields:\n");
-                for (const auto it : *eventIdFields) {
+                for (const auto& it : *eventIdFields) {
                     printf("  %d (", it.first);
-                    for (const auto it2 : it.second) {
+                    for (const auto& it2 : it.second) {
                         printf("%s ", it2.c_str());
                     }
                     printf(")\n");
@@ -479,9 +479,9 @@ void processCmdline(int argc, char *argv[],
                     printf("-1\n");
                 }
                 printf("Filters:\n");
-                for (const auto it2 : *filters) {
+                for (const auto& it2 : *filters) {
                     printf("  %s:\n", it2.first.c_str());
-                    for (const auto it3 : it2.second) {
+                    for (const auto& it3 : it2.second) {
                         printf("    %s\n", it3.c_str());
                     }
                 }
