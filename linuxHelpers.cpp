@@ -623,7 +623,7 @@ LARGE_INTEGER GetLogonTime(
     CONST LUID* user_luid
     )
 {
-    LARGE_INTEGER result = {0,};
+    LARGE_INTEGER result = {{0}};
     if (user_luid == NULL) {
         fprintf(stderr, "GetLogonTime invalid params\n");
         return result;
