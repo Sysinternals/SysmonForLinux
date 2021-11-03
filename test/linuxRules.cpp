@@ -150,7 +150,7 @@ TEST( Rules, WideString )
         { "\xc2\x90\xf0\x92\x8d\x85 ", {0x0090, 0xd808, 0xdf45, ' ', 0}, 8, 5 }
     };
 
-    for( auto CONST test : WideStrings ) {
+    for( auto CONST& test : WideStrings ) {
         EXPECT_EQ( WideStrlen( test.str1 ), test.str1len );
         EXPECT_EQ( WideStrlen( test.str2 ), test.str2len );
         EXPECT_EQ( WideStrcmp( test.str1, test.str2 ) == 0, test.strEqual );
@@ -182,7 +182,7 @@ TEST( Rules, WideString )
         EXPECT_EQ( test.lower, WideTolower( test.upper ) );
     }
 
-    for( auto CONST conv : WideConv ) {
+    for( auto CONST& conv : WideConv ) {
         CHAR utf8[32];
         WCHAR utf16[32];
         EXPECT_EQ( UTF8toUTF16( NULL, conv.utf8str, 0 ), conv.utf16count );
