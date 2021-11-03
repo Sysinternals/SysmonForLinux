@@ -3,6 +3,8 @@
 ## Installation
 The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
 
+This project contains the code for build and installing [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) on Linux.
+
 ## Dependencies
 For Ubuntu:
 ```
