@@ -55,8 +55,6 @@
 
 #define STARTUP_SEM_NAME "/sysmon-startup"
 
-extern LIST_ENTRY       g_ProcessCache;
-
 unsigned long           totalEvents = 0;
 unsigned long           badEvents = 0;
 unsigned int            numLostNotifications = 0;
@@ -1115,11 +1113,6 @@ main(
     }
 
     //
-    // Initialize process cache.
-    //
-    ProcessCacheInitialize();
-
-    //
     // Print schema
     //
     if( OPT_SET( PrintSchema ) ) {
@@ -1401,11 +1394,6 @@ main(
             sizeof(mapObjects) / sizeof(*mapObjects),
             mapObjects
         };
-
-        //
-        // Set up process cache
-        //
-        InitializeListHead( &g_ProcessCache );
 
         //
         // Set up network tracker

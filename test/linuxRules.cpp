@@ -708,8 +708,6 @@ TEST( Process, FormatSyslogString )
     unlink("/tmp/sysmonUnitTest.FormatSyslogString");
 }
 
-extern LIST_ENTRY g_ProcessCache;
-
 char FakeSyslog[4096];
 extern "C" {
 VOID syslogHelper( int priority, const char* fmt, const char *msg )
@@ -730,8 +728,6 @@ TEST( Events, DispatchEvent )
     ULONG eventSize = 0;
     size_t len = 0;
     int eventIdFd = 0;
-
-	ProcessCacheInitialize();
 
 	*FakeSyslog = 0x00;
 
