@@ -145,7 +145,7 @@ start it up again as a standard system daemon.
 
 The main function then creates a sysinternalsEBPF configuration that specifies
 the eBPF programs to be used for the different kernels, and for the different
-types of attachement (syscall tracepoints, syscall raw tracepoints, non-syscall
+types of attachment (syscall tracepoints, syscall raw tracepoints, non-syscall
 tracepoints). It also specifies which syscalls should be active based on the
 loaded Sysmon config (with pseudo-syscalls specifying non-syscall activity),
 and which programs should be active based on those syscalls.
@@ -302,7 +302,7 @@ than malloc() and avoids potential memory leaks.)
 
 More complex examples are the network events. These require multiple
 tracepoints and/or information arriving split over multiple reports, and hence
-a corrleation engine (networkTracker). Because the information sent from eBPF
+a correlation engine (networkTracker). Because the information sent from eBPF
 doesn't match a Sysmon struct, a new pseudo-event struct, pseudo-event type,
 and pseudo-syscall were created. These are connected up in the config and
 SetActiveSyscalls() in sysmonforlinux.c.
