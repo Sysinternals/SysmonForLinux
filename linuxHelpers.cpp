@@ -191,7 +191,7 @@ BOOLEAN GetProcess(
     snprintf( pathFile, 32, "/proc/%d/cmdline", ProcessId );
     fp = fopen( pathFile, "rb" );
     if (fp == NULL) {
-        return NULL;
+        return false;
     }
     numRead = fread( cmdline, 1, (128 * 1024) - 1, fp );
     fclose( fp );
@@ -623,7 +623,7 @@ LARGE_INTEGER GetLogonTime(
     CONST LUID* user_luid
     )
 {
-    LARGE_INTEGER result = {0,};
+    LARGE_INTEGER result = {{0}};
     if (user_luid == NULL) {
         fprintf(stderr, "GetLogonTime invalid params\n");
         return result;
