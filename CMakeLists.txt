@@ -510,7 +510,7 @@ set(CLANG_INCLUDES
 # function to make ebpf programs
 function(build_ebpf ebpfsrc)
     add_custom_command(OUTPUT ${ebpfsrc}.o
-                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -emit-llvm -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o -| "${LLC}" -march=bpf -filetype=obj -o "${ebpfsrc}.o"
+                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -emit-llvm -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o -| "${LLC}" -march=bpf -filetype=obj -o "${ebpfsrc}.o"
                        COMMENT "Building EBPF object ${ebpfsrc}.o"
                        DEPENDS ebpfKern/${ebpfsrc}.c ${EBPF_DEPENDS}
                        )

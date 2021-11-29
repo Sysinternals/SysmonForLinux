@@ -866,7 +866,7 @@ extern "C" bool NetworkTrackerSeenAccept(NetworkTracker *n, bool IPv4, const BYT
         return false;
     }
 
-    BYTE empty[16];
+    BYTE empty[16] = {0};
     AddrAndPort d(empty, IPv4, 0);
 
     if (n->SeenAccept(AddrAndPort(sourceAddr, IPv4, sourcePort), &d)) {
