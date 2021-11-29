@@ -269,6 +269,25 @@ TEST( Process, ProcessName )
     }
 }
 
+// fetchSessionId get the session identifier for the process. If CONFIG_AUDIT is not set, return -1 as Sysmon would.
+ULONG fetchSessionId( pid_t ProcessId )
+{
+    ULONG sessionId;
+    FILE *fp;
+    char filename[32];
+
+    snprintf( filename, 32, "/proc/%d/sessionid", ProcessId );
+    fp = fopen( filename, "r" );
+    if( fp == NULL ) {
+
+        return -1;
+    }
+
+    fscanf( fp, "%d", &sessionId );
+    fclose( fp );
+
+    return sessionId;
+}
 
 // ProcessInfo tests the GetProcessInfo function in linuxHelpers.cpp
 TEST( Process, ProcessInfo )
@@ -281,9 +300,6 @@ TEST( Process, ProcessInfo )
     ULONG ppid = 0;
     const pid_t myPid = getpid();
     ULONG sessionId = 0;
-    ULONG actualSessionId = 0;
-    char filename[32];
-    FILE *fp = NULL;
     ULONGLONG processKeys[10];
     char mysleep[] = "./mysleep";
     char* args[2] = { mysleep, NULL };
@@ -305,12 +321,7 @@ TEST( Process, ProcessInfo )
         // startTime is in 100ns intervals, allow a second leeway
         EXPECT_TRUE( abs(timeinseconds - (startTime / (1000 * 1000 * 10))) <= 1 );
         EXPECT_EQ( ppid, myPid );
-        snprintf(filename, 32, "/proc/%d/sessionid", child);
-        fp = fopen(filename, "r");
-        ASSERT_TRUE(fp != NULL);
-        fscanf(fp, "%d", &actualSessionId);
-        fclose(fp);
-        EXPECT_EQ( sessionId, actualSessionId );
+        EXPECT_EQ( sessionId, fetchSessionId( child ) );
         // check if process keys are unique
         for (unsigned int j=0; j<i; j++) {
             EXPECT_TRUE( processKeys[i] != processKeys[j] );
@@ -344,9 +355,6 @@ TEST( Process, GetProcess )
     char *ptr = NULL;
     char* cmdline_copy = NULL;
     PSYSMON_PROCESS_CREATE pc = NULL;
-    ULONG actualSessionId = 0;
-    char filename[32];
-    FILE *fp = NULL;
 
     SetBootTime();
 
@@ -414,12 +422,7 @@ TEST( Process, GetProcess )
         // startTime is in 100ns intervals, allow a second leeway
         EXPECT_TRUE( abs(timeinseconds - (pc->m_CreateTime.QuadPart / (1000 * 1000 * 10))) <= 1 );
         EXPECT_EQ( pc->m_ParentProcessId, myPid );
-        snprintf(filename, 32, "/proc/%d/sessionid", child);
-        fp = fopen(filename, "r");
-        ASSERT_TRUE(fp != NULL);
-        fscanf(fp, "%d", &actualSessionId);
-        fclose(fp);
-        EXPECT_EQ( pc->m_SessionId, actualSessionId );
+        EXPECT_EQ( pc->m_SessionId, fetchSessionId( child ) );
         // check if process keys are unique
         processKeys[i] = pc->m_ProcessKey;
         for (unsigned int j=0; j<i; j++) {
