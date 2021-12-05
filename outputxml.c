@@ -35,10 +35,27 @@
 #include "sysmonevents.h"
 #include "linuxHelpers.h"
 #include "sysmon_defs.h"
+#include "frozen.h"
 
 #define XML_ENCODING "ISO-8859-1"
 
 extern uint64_t *eventIdAddr;
+
+// Select the output format as JSON instead of XML.
+BOOL g_JSONOutput;
+
+VOID SetJSONOutput() {
+    g_JSONOutput = 1;
+}
+
+
+VOID FormatSyslogJSONString(
+    PCHAR                           EventStr,
+    size_t                          EventMax,
+    CONST PSYSMON_EVENT_TYPE_FMT    EventType,
+    CONST EVENT_DATA_DESCRIPTOR*    Fields,
+    unsigned int                    FieldCount
+);
 
 //--------------------------------------------------------------------
 //
@@ -64,6 +81,12 @@ VOID FormatSyslogString(
         return;
     }
 
+    // Write the output in JSON format.
+    if (g_JSONOutput) {
+        FormatSyslogJSONString(EventStr, EventMax, EventType, Fields, FieldCount);
+        return;
+    }
+
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
 
@@ -85,7 +108,7 @@ VOID FormatSyslogString(
     }
 
     assert(StringFromGUID2(SYSMON_PROVIDER, providerGuid, sizeof(providerGuid)) != 0);
-    
+
     GetSystemTimeAsLargeInteger(&curTime);
     LargeIntegerToSystemTimeString(systemTime, 32, &curTime);
 
@@ -163,3 +186,90 @@ VOID FormatSyslogString(
 }
 
 
+VOID FormatSyslogJSONString(
+    PCHAR                           EventStr,
+    size_t                          EventMax,
+    CONST PSYSMON_EVENT_TYPE_FMT    EventType,
+    CONST EVENT_DATA_DESCRIPTOR*    Fields,
+    unsigned int                    FieldCount
+) {
+    struct json_out out = JSON_OUT_BUF(EventStr, EventMax);
+    uint64_t eventId = 0;
+
+    unsigned int index = 0;
+    const char *field = NULL;
+    PCTSTR *fieldNames = NULL;
+    LARGE_INTEGER curTime;
+    char systemTime[32];
+    char hostname[HOST_NAME_MAX + 1];
+
+    if (eventIdAddr != NULL && eventIdAddr != MAP_FAILED) {
+        eventId = (*eventIdAddr)++;
+        msync(eventIdAddr, sizeof(eventId), MS_ASYNC);
+    } else {
+        eventId = 0;
+    }
+
+    GetSystemTimeAsLargeInteger(&curTime);
+    LargeIntegerToSystemTimeString(systemTime, 32, &curTime);
+
+    if (gethostname(hostname, HOST_NAME_MAX + 1) < 0) {
+        hostname[0] = 0x00;
+    }
+
+    // We want this to end up on the same line but this is more
+    // readable in source form.
+    json_printf(&out, "{"
+              "Event: {"
+                "System: {"
+                   "Provider: {"
+                       "Name: %Q,"
+                       "Guid: %Q"
+                   "},"
+                   "EventID: %d,"
+                   "Version: %d,"
+                   "Level: %d,"
+                   "Task: %d,"
+                   "Opcode: %d,"
+                   "Keywords: %lld,"
+                   "TimeCreated: {"
+                     "SystemTime: %Q"
+                   "},"
+                   "EventRecordID: %d,"
+                   "Execution: {"
+                     "ProcessID: %d,"
+                     "ThreadID: %d"
+                   "},"
+                   "Channel: %Q,"
+                   "Computer: %Q,"
+                   "Security: {"
+                     "UserId: %d"
+                   "}"
+                "},",
+    "Linux-Sysmon",
+    SYSMON_PROVIDER_GUID,
+    EventType->EventDescriptor->Id,
+    EventType->EventDescriptor->Version,
+    EventType->EventDescriptor->Level,
+    EventType->EventDescriptor->Task,
+    EventType->EventDescriptor->Opcode,
+    EventType->EventDescriptor->Keyword,
+    systemTime,
+    eventId,
+    getpid(),
+    GetTid(),
+    "Linux-Sysmon/Operational",
+    hostname,
+    geteuid());
+
+    json_printf(&out, "EventData: {");
+    fieldNames = (PCTSTR *)EventType->FieldNames;
+    for( index = 0; index < FieldCount; index++ ) {
+        field = (const char *)Fields[index].Ptr;
+        json_printf(&out, "%Q: %Q%s", fieldNames[index],
+                    field != NULL ? field : "", index == FieldCount -1 ? "": ",");
+    };
+
+    // LF for valid JSONL output
+    json_printf(&out, "}}}\n");
+}

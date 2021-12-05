@@ -1,5 +1,25 @@
 # Sysmon For Linux install and build instructions
 
+## Local modifications
+
+1. New command line option "-socket /var/run/sysmon.socket" will
+   stream events into the socket instead of writing to syslog. This is
+   more efficient as it allows an external log forwarder to connect to
+   the socket and saves writing the events to disk (and filling it
+   up). If no listener is currently connected, the events will be
+   dropped.
+
+2. A new command like option "-json" allows events to be written in
+   JSON since this is the 21st century and XML is so quaint.
+
+The updated service file contains both these options. Once the service
+is installed simply read from the unix domain socket and events will
+be sent in JSONL format, eg:
+
+```
+socat - UNIX-CONNECT:/var/run/sysmon.sock
+```
+
 ## Installation
 The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
 
@@ -126,4 +146,3 @@ See DEVELOP.md
 Sysmon For Linux is licensed under MIT, with the eBPF programs licensed under
 GPL2.  SysinternalsEBPF (on which Sysmon For Linux depends) is licensed under
 LGPL2.1, with the eBPF code library licensed under GPL2.
-

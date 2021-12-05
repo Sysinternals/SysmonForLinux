@@ -28,6 +28,9 @@
 #include "linuxTypes.h"
 #include "sysmonevents.h"
 
+// Select the output format as JSON instead of XML.
+VOID SetJSONOutput();
+
 VOID FormatSyslogString(
     PCHAR EventStr,
     size_t EventMax,
