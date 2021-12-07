@@ -80,10 +80,8 @@ be used to create an rpm package.
 ## Autodiscovery of Offsets
 Sysmon attempts to automatically discover the offsets of some members of some
 kernel structs. If this fails, please provide details of the kernel version
-(and config if possible) plus the error message to:
-```
-kevin.sheldrake AT microsoft.com
-```
+(and config if possible) plus the error message to the GitHub issues page.
+
 You can then generate a configuration file to override the autodiscovery by
 building the getOffsets module in the /opt/sysinternals/getOffsets directory.
 See the README.md in that directory for more information.
