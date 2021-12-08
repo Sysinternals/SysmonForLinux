@@ -6,25 +6,37 @@ The packages are available in the official Microsoft Linux repositories and inst
 This project contains the code for build and installing [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) on Linux.
 
 ## Dependencies
-For Ubuntu:
+For Ubuntu 20.04 and later:
 ```
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 echo "deb https://download.mono-project.com/repo/ubuntu vs-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-vs.list
 sudo apt update
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr monodevelop googletest google-mock libgmock-dev libjson-glib-dev
+```
+for Ubuntu 18.04:
+
+```
 sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr monodevelop googletest google-mock libjson-glib-dev
-cd /usr/src/googletest
-sudo mkdir build
-sudo chown *user*:*group* build
-cd build
-cmake ..
+mkdir googletest-build
+cd googletest-build
+cmake /usr/src/googletest
 make
 sudo make install
-
-Sysmon For Linux also depends on SysinternalsEBPF being installed: library
-libsysinternalsEBPF.so, header libsysinternalsEBPF.h, plus resource files in
-/opt/sysinternalsEBPF.  These can be installed from the SysinternalsEBPF
-project.
 ```
+The googletest-related libraries are built from source and installed
+under `/usr/local`:
+- `/usr/local/include/gtest`
+- `/usr/local/include/gmock`
+- `/usr/local/lib/libgtest*.a`
+- `/usr/local/lib/libgmock*.a`
+
+Sysmon For Linux also depends on SysinternalsEBPF being installed:
+library `libsysinternalsEBPF.so`, header `libsysinternalsEBPF.h`, plus
+resource files in `/opt/sysinternalsEBPF`. These can be installed from
+the
+[SysinternalsEBPF](https://github.com/Sysinternals/SysinternalsEBPF)
+project or via the `sysinternalsebpf` DEB package from the
+_packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.MD)).
 
 ## Build
 ```
