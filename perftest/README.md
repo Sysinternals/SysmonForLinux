@@ -58,6 +58,62 @@ The results, in order of lowest CPU utilisation, were:
 5. LAUREL 0.1.6-pre
 6. Auditbeat 7.16.0
 
+## Update!
+
+Hilko got in touch and explained that kaudit/auditd was logging to
+systemd-journald as well as its intended target (/var/log/audit or audisp) and
+that this was causing the heavy load seen on systemd-journald. He suggested
+that a user would not have logging duplicated if they had a dedicated logging
+system set up, so it was unreasonable to perform this double logging. After
+consultation with Hilko, and a quick Google, I turned off this double logging
+for auditd as follows:
+
+```
+systemctl stop systemd-journald-audit.socket 
+systemctl disable systemd-journald-audit.socket
+systemctl mask systemd-journald-audit.socket
+systemctl restart systemd-journald
+```
+
+That vastly improved the results for everything except Sysmon For Linux. On
+investigation, I discovered that for Sysmon For Linux, both syslog *and*
+systemd-journald were logging its events! As in, Sysmon For Linux was still
+suffering from double logging when all the others were not. I fixed that by
+disabling the local logging by systemd-journald, as everything was being 
+forwarded to rsyslogd anyway - the same argument applies (I believe) that if
+the logs are being forwarded, a user would not want them logged by
+systemd-journald as well. I disabled it by setting
+
+```
+Storage=none
+```
+
+in /etc/systemd/journald.conf. The logs still make it to syslog as intended.
+
+The new graph is as follows:
+
+![Updated performance graph](perf2.png)
+
+This new graph shows that with systemd-journald taken out of the equation,
+auditd (RAW) and go-audit are the winners, followed by auditd (enriched),
+followed by both Sysmon For Linux and Laurel tied, followed by auditbeat.
+Given that Sysmon For Linux and Laurel provide much more useful output than
+auditd and go-audit, this is to be expected. Note that Sysmon For Linux
+provides numerous other rich events (process termination, file, network,
+direct block access, and ptrace, with more to come), and advanced filtering,
+in addition to rapid event capture via eBPF.
+
+The new results, in order of lowest CPU utilisation, are:
+
+1. Auditd 2.8.5 (RAW)
+2. Go-Audit dev+20211208153116
+3. Auditd 2.8.5 (ENRICHED)
+4. Sysmon For Linux 1.0.2
+5. LAUREL 0.1.6-pre
+6. Auditbeat 7.16.0
+
+Thanks to Hilko for the recommendations to retest.
+
 ## Approach
 
 I wrote my own execPerSec tool in C that would launch a specified number of 
@@ -79,7 +135,7 @@ Hilko stated on his site that the CPU usage for Sysmon For Linux included
 systemd-journald because it wrote its events via it. In my tests I noted that 
 when no audit tool was in use, or auditd was in use with no audit rules, that 
 systemd-journald consumed no CPU. But when an audit tool was in use, auditd or 
-otherwise, systemd-journald consumed significant amounts of CPU. I therefore 
+otherwise, systemd-journald consumed significant amounts of CPU\*. I therefore 
 included the amount of CPU used by systemd-journald in all tests. If, as 
 implied, the other tools didn't cause systemd-journald to consume any CPU, then 
 it wouldn't add anything to the total. If, however, it did, then I thought this 
@@ -104,4 +160,6 @@ ascribed to the eBPF programs.
 
 Raw data can be found in perf.csv and scripts, programs, and configuration
 files can be found in the tests directory.
+
+\* This was true of the first round of tests. See 'Update' above.
 
