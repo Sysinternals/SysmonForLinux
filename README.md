@@ -36,7 +36,7 @@ resource files in `/opt/sysinternalsEBPF`. These can be installed from
 the
 [SysinternalsEBPF](https://github.com/Sysinternals/SysinternalsEBPF)
 project or via the `sysinternalsebpf` DEB package from the
-_packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.MD)).
+_packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.md)).
 
 ## Build
 ```
