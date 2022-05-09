@@ -49,6 +49,7 @@ jobs:
       displayName: "Build Sysmon Binary"
     
     - script: |
+        cd build
         make packages
         mv deb/*.deb $(Build.SourcesDirectory)/pkgbuild
       displayName: "Build Sysmon Package"
