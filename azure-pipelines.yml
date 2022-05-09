@@ -45,13 +45,11 @@ jobs:
         mkdir build && cd build
         cmake ..
         make
-        apt remove -y sysinternalsebpf
       displayName: "Build Sysmon Binary"
     
     - script: |
         cd build
         make packages
-        mv deb/*.deb $(Build.SourcesDirectory)/pkgbuild
       displayName: "Build Sysmon Package"
     
     - task: CopyFiles@2
