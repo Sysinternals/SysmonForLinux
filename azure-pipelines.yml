@@ -17,7 +17,7 @@ jobs:
     pool: "Sysmon-Ubuntu-20.04-Pool"
     steps:
     - script: |
-        sudo apt install sysinternalsebpf
+        apt install sysinternalsebpf
         mkdir build && cd build
         cmake ..
         make
