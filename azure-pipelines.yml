@@ -13,7 +13,7 @@ pr:
 - main
 
 jobs:
-  - job: "Build_Sysmon"
+  - job: "Build_Sysmon_Ubuntu"
     pool: "Sysmon-Ubuntu-20.04-Pool"
     steps:
     - checkout: self
@@ -33,7 +33,7 @@ jobs:
     pool: "Sysmon-Ubuntu-20.04-Pool"
     condition: not(eq(variables['Build.Reason'], 'PullRequest'))
     dependsOn:
-      - "Build_Sysmon"
+      - "Build_Sysmon_Ubuntu"
     steps:
     - checkout: self
       submodules: true
@@ -65,7 +65,7 @@ jobs:
         publishLocation: 'Container'
 
 # CentOS build and package
-  - job: "Build_Sysmon"
+  - job: "Build_Sysmon_CentOS"
     pool: "Sysmon-CentOS-8-Pool"
     steps:
     - checkout: self
@@ -82,7 +82,7 @@ jobs:
     pool: "Sysmon-CentOS-8-Pool"
     condition: not(eq(variables['Build.Reason'], 'PullRequest'))
     dependsOn:
-      - "Build_Sysmon"
+      - "Build_Sysmon_CentOS"
     steps:
     - checkout: self
       submodules: true
