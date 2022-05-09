@@ -1,4 +1,4 @@
-# Azure build pipelines for Sysinternalsebpf
+# Azure build pipelines for Sysmon
 
 trigger:
     branches:
@@ -13,20 +13,22 @@ pr:
 - main
 
 jobs:
-  - job: "Build_Sysinternalsebpf"
+  - job: "Build_Sysmon"
     pool: "Sysmon-Ubuntu-20.04-Pool"
     steps:
     - script: |
+        sudo apt install sysinternalsebpf
         mkdir build && cd build
         cmake ..
         make
-      displayName: "Build Sysinternalsebpf Binary"
+        sudo apt remove sysinternalsebpf
+      displayName: "Build Sysmon Binary"
   
-  - job: "Sysinternalsebpf_Package_Build"
+  - job: "Sysmon_Package_Build"
     pool: "Sysmon-Ubuntu-20.04-Pool"
     condition: not(eq(variables['Build.Reason'], 'PullRequest'))
     dependsOn:
-      - "Build_Sysinternalsebpf"
+      - "Build_Sysmon"
     steps:
     - script: |
         export REVISION=$(Build.BuildId)
@@ -34,14 +36,14 @@ jobs:
         mkdir $(Build.SourcesDirectory)/build && cd $(Build.SourcesDirectory)/build
         cmake ..
         make
-      displayName: "Build Sysinternalsebpf Binary"
+      displayName: "Build Sysmon Binary"
     
     - script: |
         mkdir $(Build.SourcesDirectory)/pkgbuild
         cd $(Build.SourcesDirectory)/build
         make packages
         mv deb/*.deb $(Build.SourcesDirectory)/pkgbuild
-      displayName: "Build Sysinternalsebpf Package"
+      displayName: "Build Sysmon Package"
     
     - task: CopyFiles@2
       inputs:
