@@ -16,6 +16,8 @@ jobs:
   - job: "Build_Sysmon"
     pool: "Sysmon-Ubuntu-20.04-Pool"
     steps:
+    - checkout: self
+      submodules: true
     - script: |
         wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
         dpkg -i packages-microsoft-prod.deb
@@ -33,6 +35,8 @@ jobs:
     dependsOn:
       - "Build_Sysmon"
     steps:
+    - checkout: self
+      submodules: true
     - script: |
         export REVISION=$(Build.BuildId)
         sed -i "s/999999/$REVISION/g" $(Build.SourcesDirectory)/CMakeLists.txt
