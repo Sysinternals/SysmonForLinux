@@ -29,7 +29,7 @@ jobs:
         apt remove -y sysinternalsebpf
       displayName: "Build Sysmon Binary"
   
-  - job: "Sysmon_Package_Build"
+  - job: "Sysmon_Package_Build_Ubuntu"
     pool: "Sysmon-Ubuntu-20.04-Pool"
     condition: not(eq(variables['Build.Reason'], 'PullRequest'))
     dependsOn:
@@ -78,7 +78,7 @@ jobs:
         yum remove sysinternalsebpf
       displayName: "Build Sysmon Binary"
   
-  - job: "Sysmon_Package_Build"
+  - job: "Sysmon_Package_Build_CentOS"
     pool: "Sysmon-CentOS-8-Pool"
     condition: not(eq(variables['Build.Reason'], 'PullRequest'))
     dependsOn:
