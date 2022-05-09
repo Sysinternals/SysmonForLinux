@@ -38,23 +38,24 @@ jobs:
     - checkout: self
       submodules: true
     - script: |
-        export REVISION=$(Build.BuildId)
-        sed -i "s/999999/$REVISION/g" $(Build.SourcesDirectory)/CMakeLists.txt
-        mkdir $(Build.SourcesDirectory)/build && cd $(Build.SourcesDirectory)/build
+        wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+        dpkg -i packages-microsoft-prod.deb
+        apt update
+        apt install sysinternalsebpf
+        mkdir build && cd build
         cmake ..
         make
+        apt remove -y sysinternalsebpf
       displayName: "Build Sysmon Binary"
     
     - script: |
-        mkdir $(Build.SourcesDirectory)/pkgbuild
-        cd $(Build.SourcesDirectory)/build
         make packages
         mv deb/*.deb $(Build.SourcesDirectory)/pkgbuild
       displayName: "Build Sysmon Package"
     
     - task: CopyFiles@2
       inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/pkgbuild/'
+        SourceFolder: '$(Build.SourcesDirectory)/build/deb/'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu/'
       displayName: 'Copy build artifacts to staging'
 
