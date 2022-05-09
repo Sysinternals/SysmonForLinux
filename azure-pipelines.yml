@@ -17,6 +17,9 @@ jobs:
     pool: "Sysmon-Ubuntu-20.04-Pool"
     steps:
     - script: |
+        wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+        dpkg -i packages-microsoft-prod.deb
+        apt update
         apt install sysinternalsebpf
         mkdir build && cd build
         cmake ..
