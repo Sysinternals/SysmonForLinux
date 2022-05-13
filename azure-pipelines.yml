@@ -12,100 +12,127 @@ trigger:
 pr:
 - main
 
-jobs:
-  - job: "Build_Sysmon_Ubuntu"
-    pool: "Sysmon-Ubuntu-20.04-Pool"
-    steps:
-    - checkout: self
-      submodules: true
-    - script: |
-        wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-        dpkg -i packages-microsoft-prod.deb
-        apt -y update
-        apt install sysinternalsebpf
-        mkdir build && cd build
-        cmake ..
-        make
-        apt remove -y sysinternalsebpf
-      displayName: "Build Sysmon Binary"
-  
-  - job: "Sysmon_Package_Build_Ubuntu"
-    pool: "Sysmon-Ubuntu-20.04-Pool"
-    condition: not(eq(variables['Build.Reason'], 'PullRequest'))
-    dependsOn:
-      - "Build_Sysmon_Ubuntu"
-    steps:
-    - checkout: self
-      submodules: true
-    - script: |
-        wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-        dpkg -i packages-microsoft-prod.deb
-        apt -y update
-        apt install sysinternalsebpf
-        mkdir build && cd build
-        cmake ..
-        make
-      displayName: "Build Sysmon Binary"
+stages:
+ - stage: "Build"
+   jobs:
+    - job: "Build_Sysmon_Ubuntu_20_04_Package"
+      pool: "Sysmon-Ubuntu-20.04-Pool"
+      steps:
+      - checkout: self
+        submodules: true
+      - script: |
+          wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          dpkg -i packages-microsoft-prod.deb
+          apt -y update
+          apt install sysinternalsebpf
+          mkdir build && cd build
+          cmake ..
+          make
+          apt remove -y sysinternalsebpf
+        displayName: "Build Ubuntu Sysmon 20.04 Binary"
     
-    - script: |
-        cd build
-        make packages
-      displayName: "Build Sysmon Package"
+      - script: |
+          cd build
+          make packages
+        displayName: "Build Sysmon 20.04 Package"
     
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/build/deb/'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu/'
-      displayName: 'Copy build artifacts to staging'
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/build/deb/'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        displayName: 'Copy build artifacts to staging'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'Ubuntu_20_04_drop'
+          publishLocation: 'Container'
 
 # CentOS build and package
-  - job: "Build_Sysmon_CentOS"
-    pool: "Sysmon-CentOS-8-Pool"
-    steps:
-    - checkout: self
-      submodules: true
-    - script: |
-        yum install sysinternalsebpf
-        mkdir build && cd build
-        cmake ..
-        make
-        yum remove sysinternalsebpf
-      displayName: "Build Sysmon Binary"
+    - job: "Build_Sysmon_CentOS_8_Package"
+      pool: "Sysmon-CentOS-8-Pool"
+      steps:
+      - checkout: self
+        submodules: true
+      - script: |
+          yum install sysinternalsebpf
+          mkdir build && cd build
+          cmake ..
+          make
+          yum remove sysinternalsebpf
+        displayName: "Build CentOS Sysmon 8 Binary"
   
-  - job: "Sysmon_Package_Build_CentOS"
-    pool: "Sysmon-CentOS-8-Pool"
-    condition: not(eq(variables['Build.Reason'], 'PullRequest'))
-    dependsOn:
-      - "Build_Sysmon_CentOS"
-    steps:
-    - checkout: self
-      submodules: true
-    - script: |
-        yum install sysinternalsebpf
-        mkdir build && cd build
-        cmake ..
-        make
-      displayName: "Build Sysmon Binary"
+      - script: |
+          cd build
+          make packages
+        displayName: "Build Sysmon CentOS 8 Package"
     
-    - script: |
-        cd build
-        make packages
-      displayName: "Build Sysmon Package"
-    
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/build/rpm/'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/CentOS/'
-      displayName: 'Copy build artifacts to staging'
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/build/rpm/'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        displayName: 'Copy build artifacts to staging'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'CentOS_8_drop'
+          publishLocation: 'Container'
+
+ - stage: Sign
+   jobs:
+    - job: "Sign_Sysmon_Ubuntu_20_04"
+      pool: "Sysmon-Ubuntu-20.04-Pool"
+      steps:
+      
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'Ubuntu_20_04_drop'
+          targetPath: '$(Pipeline.Workspace)'
+           
+      - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        displayName: 'ESRP CodeSigning DEB'
+        inputs:
+          ConnectedServiceName: 'Sysinternals ESRP CodeSigning'
+          FolderPath: '$(Pipeline.Workspace)'
+          Pattern: '*.deb'
+          signConfigType: inlineSignParams
+          inlineOperation: |
+            [
+              {
+                "keyCode": "CP-450779-Pgp",
+                "OperationCode": "LinuxSign",
+                "Parameters": {},
+                "ToolName": "sign",
+                "ToolVersion": "1.0"
+              }
+            ]
+
+    - job: "Sign_Sysmon_CentOS_8"
+      pool: "CentOS_Package_Build"
+      steps:
+
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'CentOS_8_drop'
+          targetPath: '$(Pipeline.Workspace)'
+
+      - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+        displayName: 'ESRP CodeSigning DEB'
+        inputs:
+          ConnectedServiceName: 'Sysinternals ESRP CodeSigning'
+          FolderPath: '$(Pipeline.Workspace)'
+          Pattern: '*.rpm'
+          signConfigType: inlineSignParams
+          inlineOperation: |
+            [
+              {
+                "keyCode": "CP-450779-Pgp",
+                "OperationCode": "LinuxSign",
+                "Parameters": {},
+                "ToolName": "sign",
+                "ToolVersion": "1.0"
+              }
+            ]
