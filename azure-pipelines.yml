@@ -28,12 +28,12 @@ stages:
           mkdir build && cd build
           cmake ..
           make
-          apt remove -y sysinternalsebpf
         displayName: "Build Ubuntu Sysmon 20.04 Binary"
     
       - script: |
           cd build
           make packages
+          apt remove -y sysinternalsebpf          
         displayName: "Build Sysmon 20.04 Package"
     
       - task: CopyFiles@2
@@ -59,12 +59,12 @@ stages:
           mkdir build && cd build
           cmake ..
           make
-          yum remove sysinternalsebpf
         displayName: "Build CentOS Sysmon 8 Binary"
   
       - script: |
           cd build
           make packages
+          yum remove sysinternalsebpf
         displayName: "Build Sysmon CentOS 8 Package"
     
       - task: CopyFiles@2
