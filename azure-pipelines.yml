@@ -90,7 +90,7 @@ stages:
    jobs:
     - job: "Sign_Sysmon_Ubuntu_20_04"
       pool: "Sysmon-Ubuntu-20.04-Pool"
-      condition: not(eq(variables['Build.Reason'], 'PullRequest')) 
+      condition: eq(variables['Sign'], 'true')
       workspace:
         clean: all      
       steps:
@@ -121,7 +121,7 @@ stages:
 
     - job: "Sign_Sysmon_CentOS_8"
       pool: "CentOS_Package_Build"
-      condition: not(eq(variables['Build.Reason'], 'PullRequest')) 
+      condition: eq(variables['Sign'], 'true')
       workspace:
         clean: all      
       steps:
