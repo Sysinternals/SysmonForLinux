@@ -83,6 +83,8 @@ stages:
    jobs:
     - job: "Sign_Sysmon_Ubuntu_20_04"
       pool: "Sysmon-Ubuntu-20.04-Pool"
+      workspace:
+        clean: all      
       steps:
       
       - task: DownloadPipelineArtifact@2
@@ -111,6 +113,8 @@ stages:
 
     - job: "Sign_Sysmon_CentOS_8"
       pool: "CentOS_Package_Build"
+      workspace:
+        clean: all      
       steps:
 
       - task: DownloadPipelineArtifact@2
