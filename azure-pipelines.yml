@@ -1,5 +1,12 @@
 # Azure build pipelines for Sysmon
 
+resources:
+  repositories:
+  - repository: Sysmon
+    type: github
+    endpoint: sysinternals
+    name: sysinternals/SysmonforLinux
+
 trigger:
     branches:
       include:
@@ -18,7 +25,7 @@ stages:
     - job: "Build_Sysmon_Ubuntu_20_04_Package"
       pool: "Sysmon-Ubuntu-20.04-Pool"
       steps:
-      - checkout: self
+      - checkout: Sysmon
         submodules: true
       - script: |
           wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -52,7 +59,7 @@ stages:
     - job: "Build_Sysmon_CentOS_8_Package"
       pool: "Sysmon-CentOS-8-Pool"
       steps:
-      - checkout: self
+      - checkout: Sysmon
         submodules: true
       - script: |
           yum install sysinternalsebpf
@@ -83,6 +90,7 @@ stages:
    jobs:
     - job: "Sign_Sysmon_Ubuntu_20_04"
       pool: "Sysmon-Ubuntu-20.04-Pool"
+      condition: not(eq(variables['Build.Reason'], 'PullRequest')) 
       workspace:
         clean: all      
       steps:
@@ -113,6 +121,7 @@ stages:
 
     - job: "Sign_Sysmon_CentOS_8"
       pool: "CentOS_Package_Build"
+      condition: not(eq(variables['Build.Reason'], 'PullRequest')) 
       workspace:
         clean: all      
       steps:
