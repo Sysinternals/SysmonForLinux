@@ -82,7 +82,7 @@ stages:
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/CentOS8'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/CentOS_8'
           ArtifactName: 'CentOS_8_drop'
           publishLocation: 'Container'
 
