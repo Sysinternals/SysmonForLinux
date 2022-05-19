@@ -1,4 +1,4 @@
-# Sysmon For Linux install and build instructions
+# Sysmon For Linux install and build instructions [![Build Status](https://dev.azure.com/sysinternals/Tools/_apis/build/status/Sysinternals.SysmonForLinux?repoName=Sysinternals%2FSysmonForLinux&branchName=refs%2Fpull%2F68%2Fmerge)](https://dev.azure.com/sysinternals/Tools/_build/latest?definitionId=340&repoName=Sysinternals%2FSysmonForLinux&branchName=refs%2Fpull%2F68%2Fmerge)
 
 ## Installation
 The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
