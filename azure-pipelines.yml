@@ -45,13 +45,13 @@ stages:
     
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/build/deb/'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          SourceFolder: '$(Build.SourcesDirectory)/build/deb/*.deb'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04'
         displayName: 'Copy build artifacts to staging'
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04'
           ArtifactName: 'Ubuntu_20_04_drop'
           publishLocation: 'Container'
 
@@ -76,13 +76,13 @@ stages:
     
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/build/rpm/'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          SourceFolder: '$(Build.SourcesDirectory)/build/rpm/*.rpm'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/CentOS_8'
         displayName: 'Copy build artifacts to staging'
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/CentOS8'
           ArtifactName: 'CentOS_8_drop'
           publishLocation: 'Container'
 
@@ -99,13 +99,13 @@ stages:
         inputs:
           buildType: 'current'
           artifactName: 'Ubuntu_20_04_drop'
-          targetPath: '$(Pipeline.Workspace)'
+          targetPath: '$(Pipeline.Workspace)/Ubuntu_20_04_drop'
            
       - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
         displayName: 'ESRP CodeSigning DEB'
         inputs:
           ConnectedServiceName: 'Sysinternals ESRP CodeSigning'
-          FolderPath: '$(Pipeline.Workspace)'
+          FolderPath: '$(Pipeline.Workspace)/Ubuntu_20_04_drop'
           Pattern: '*.deb'
           signConfigType: inlineSignParams
           inlineOperation: |
@@ -121,7 +121,7 @@ stages:
 
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Pipeline.Workspace)'
+          SourceFolder: '$(Pipeline.Workspace)/Ubuntu_20_04_drop'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04_Signed/'
         displayName: 'Copy build artifacts to staging'
 
@@ -142,13 +142,13 @@ stages:
         inputs:
           buildType: 'current'
           artifactName: 'CentOS_8_drop'
-          targetPath: '$(Pipeline.Workspace)'
+          targetPath: '$(Pipeline.Workspace)/CentOS_8_drop'
 
       - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
         displayName: 'ESRP CodeSigning DEB'
         inputs:
           ConnectedServiceName: 'Sysinternals ESRP CodeSigning'
-          FolderPath: '$(Pipeline.Workspace)'
+          FolderPath: '$(Pipeline.Workspace)/CentOS_8_drop'
           Pattern: '*.rpm'
           signConfigType: inlineSignParams
           inlineOperation: |
@@ -164,12 +164,12 @@ stages:
 
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Pipeline.Workspace)'
+          SourceFolder: '$(Pipeline.Workspace)/CentOS_8_drop'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/CentOS_8_Signed/'
         displayName: 'Copy build artifacts to staging'
 
       - task: PublishBuildArtifacts@1
         inputs:
           PathtoPublish: '$(Build.ArtifactStagingDirectory)/CentOS_8_Signed/'
-          ArtifactName: 'CentOS_8_Signed_Signed'
+          ArtifactName: 'CentOS_8_Signed'
           publishLocation: 'Container'            
