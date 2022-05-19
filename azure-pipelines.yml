@@ -45,7 +45,7 @@ stages:
     
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/build/deb/*.deb'
+          Contents: '$(Build.SourcesDirectory)/build/deb/*.deb'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04'
         displayName: 'Copy build artifacts to staging'
 
@@ -76,7 +76,7 @@ stages:
     
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/build/rpm/*.rpm'
+          contents: '$(Build.SourcesDirectory)/build/rpm/*.rpm'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/CentOS_8'
         displayName: 'Copy build artifacts to staging'
 
