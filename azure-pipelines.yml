@@ -39,7 +39,7 @@ stages:
     
       - script: |
           mkdir $(Build.SourcesDirectory)/pkgbuild
-          cd $(Build.SourcesDirectory)/pkgbuild
+          cd $(Build.SourcesDirectory)/build
           make packages
           mv deb/*.deb $(Build.SourcesDirectory)/pkgbuild
           apt remove -y sysinternalsebpf          
@@ -72,7 +72,7 @@ stages:
   
       - script: |
           mkdir $(Build.SourcesDirectory)/pkgbuild
-          cd build
+          cd $(Build.SourcesDirectory)/build
           make packages
           mv rpm/*.rpm $(Build.SourcesDirectory)/pkgbuild
           yum remove sysinternalsebpf
