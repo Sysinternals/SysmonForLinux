@@ -119,6 +119,18 @@ stages:
               }
             ]
 
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Pipeline.Workspace)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04_Signed/'
+        displayName: 'Copy build artifacts to staging'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Ubuntu_20_04_Signed/'
+          ArtifactName: 'Ubuntu_20_04_Signed'
+          publishLocation: 'Container'
+
     - job: "Sign_Sysmon_CentOS_8"
       pool: "CentOS_Package_Build"
       condition: eq(variables['Sign'], 'true')
@@ -149,3 +161,15 @@ stages:
                 "ToolVersion": "1.0"
               }
             ]
+
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Pipeline.Workspace)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/CentOS_8_Signed/'
+        displayName: 'Copy build artifacts to staging'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/CentOS_8_Signed/'
+          ArtifactName: 'CentOS_8_Signed_Signed'
+          publishLocation: 'Container'            
