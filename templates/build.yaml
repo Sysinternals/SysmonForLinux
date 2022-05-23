@@ -3,3 +3,4 @@ steps:
     mkdir build && cd build
     cmake ..
     make
+  displayName: "Build Sysmon binaries"
