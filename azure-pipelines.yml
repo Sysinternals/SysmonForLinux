@@ -29,4 +29,4 @@ stages:
         submodules: true
 
       - template: templates/build.yaml
-      displayName: "Build Sysinternalsebpf"
+      displayName: "Build Sysmon"
