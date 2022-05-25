@@ -1,0 +1,6 @@
+steps:
+- script: |
+    mkdir build && cd build
+    cmake ..
+    make
+  displayName: "Build Sysmon binaries"

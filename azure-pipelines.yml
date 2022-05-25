@@ -1,0 +1,32 @@
+# Azure build pipelines for Sysmon
+
+resources:
+  repositories:
+  - repository: Sysmon
+    type: github
+    endpoint: sysinternals
+    name: sysinternals/SysmonforLinux
+
+trigger:
+    branches:
+      include:
+        - release/*
+        - main
+      exclude:
+        - dev/*
+        - test/*
+  
+pr:
+- main
+
+stages:
+ - stage: "Build"
+   jobs:
+    - job: "Build_Sysmon_Ubuntu_20_04_Package"
+      pool: "Sysmon-Ubuntu-20.04-Pool"
+      steps:
+      - checkout: Sysmon
+        submodules: true
+
+      - template: templates/build.yaml
+      displayName: "Build Sysmon"
