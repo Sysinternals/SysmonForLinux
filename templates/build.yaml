@@ -1,11 +1,6 @@
 steps:
 - script: |
-    wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-    dpkg -i packages-microsoft-prod.deb
-    apt -y update
-    apt -y install sysinternalsebpf
     mkdir build && cd build
     cmake ..
     make
-    apt -y remove sysinternalsebpf
   displayName: "Build Sysmon binaries"

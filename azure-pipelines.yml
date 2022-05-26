@@ -22,11 +22,21 @@ pr:
 stages:
  - stage: "Build"
    jobs:
-    - job: "Build_Sysmon_Ubuntu_20_04_Package"
+    - job: "Build_Sysmon_Ubuntu_20_04"
       pool: "Sysmon-Ubuntu-20.04-Pool"
       steps:
       - checkout: Sysmon
         submodules: true
 
+      - script: |
+          wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          dpkg -i packages-microsoft-prod.deb
+          apt -y update
+          apt -y install sysinternalsebpf
+        displayName: "Install Sysinternalsebpf dependency"
+
       - template: templates/build.yaml
-      displayName: "Build Sysmon"
+
+      - script: |
+          apt -y remove sysinternalsebpf
+        displayName: "Remove Sysinternalsebpf dependency"
