@@ -28,5 +28,16 @@ stages:
       - checkout: Sysmon
         submodules: true
 
+      - script: |
+          wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          dpkg -i packages-microsoft-prod.deb
+          apt -y update
+          apt -y install sysinternalsebpf
+      displayName: "Install Sysinternalsebpf dependency"
+
       - template: templates/build.yaml
       displayName: "Build Sysmon"
+
+      - script: |
+          apt -y remove sysinternalsebpf
+      displayName: "Remove Sysinternalsebpf dependency"
