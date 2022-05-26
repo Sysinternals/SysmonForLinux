@@ -22,7 +22,7 @@ pr:
 stages:
  - stage: "Build"
    jobs:
-    - job: "Build_Sysmon_Ubuntu_20_04_Package"
+    - job: "Build_Sysmon_Ubuntu_20_04"
       pool: "Sysmon-Ubuntu-20.04-Pool"
       steps:
       - checkout: Sysmon
