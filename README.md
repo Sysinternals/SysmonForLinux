@@ -5,7 +5,7 @@ The packages are available in the official Microsoft Linux repositories and inst
 
 This project contains the code for build and installing [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) on Linux.
 
-## Dependencies 
+## Dependencies
 For Ubuntu 20.04 and later:
 ```
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
