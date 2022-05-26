@@ -33,11 +33,11 @@ stages:
           dpkg -i packages-microsoft-prod.deb
           apt -y update
           apt -y install sysinternalsebpf
-      displayName: "Install Sysinternalsebpf dependency"
+        displayName: "Install Sysinternalsebpf dependency"
 
       - template: templates/build.yaml
       displayName: "Build Sysmon"
 
       - script: |
           apt -y remove sysinternalsebpf
-      displayName: "Remove Sysinternalsebpf dependency"
+        displayName: "Remove Sysinternalsebpf dependency"
