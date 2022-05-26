@@ -36,7 +36,7 @@ stages:
         displayName: "Install Sysinternalsebpf dependency"
 
       - template: templates/build.yaml
-      displayName: "Build Sysmon"
+        displayName: "Build Sysmon"
 
       - script: |
           apt -y remove sysinternalsebpf
