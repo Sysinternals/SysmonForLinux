@@ -23,7 +23,12 @@ stages:
  - stage: "Build"
    jobs:
     - job: "Build_Sysmon_Ubuntu_20_04"
-      pool: "Sysmon-Ubuntu-20.04-Pool"
+      pool: 
+        name: "Sysinternals-for-Linux"
+        demands:
+        - SYSINT_TOOL -equals sysmon   
+        - SYSINT_DISTRIBUTION -equals ubuntu_20_04
+        - SYSINT_ARCHITECTURE -equals x86_64
       steps:
       - checkout: Sysmon
         submodules: true
