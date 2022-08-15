@@ -24,11 +24,9 @@ stages:
    jobs:
     - job: "Build_Sysmon_Ubuntu_20_04"
       pool: 
-        name: "Sysinternals-for-Linux"
+        name: "Sysinternals-for-Linux-AME"
         demands:
-        - SYSINT_TOOL -equals sysmon   
-        - SYSINT_DISTRIBUTION -equals ubuntu_20_04
-        - SYSINT_ARCHITECTURE -equals x86_64
+        - ImageOverride -equals sysmon-ubuntu-build-agent
       steps:
       - checkout: Sysmon
         submodules: true
