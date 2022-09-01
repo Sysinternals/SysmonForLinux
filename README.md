@@ -6,14 +6,14 @@ The packages are available in the official Microsoft Linux repositories and inst
 This project contains the code for build and installing [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) on Linux.
 
 ## Dependencies
-For Ubuntu 20.04 and later:
+Ubuntu 20.04 and later:
 ```
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 echo "deb https://download.mono-project.com/repo/ubuntu vs-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-vs.list
 sudo apt update
 sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr monodevelop googletest google-mock libgmock-dev libjson-glib-dev
 ```
-for Ubuntu 18.04:
+Ubuntu 18.04:
 
 ```
 sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr monodevelop googletest google-mock libjson-glib-dev
@@ -22,6 +22,16 @@ cd googletest-build
 cmake /usr/src/googletest
 make
 sudo make install
+```
+RHEL 8 and later:
+
+```
+sudo dnf install dnf-plugins-core
+sudo dnf install epel-release
+sudo dnf config-manager --set-enabled powertools
+sudo rpmkeys --import "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF"
+sudo su -c 'curl https://download.mono-project.com/repo/centos8-stable.repo | tee /etc/yum.repos.d/mono-centos8-stable.repo'
+sudo yum install cmake gcc gcc-c++ kernel-devel make json-glib-devel elfutils-libelf-devel llvm clang libxml2-devel gtest-devel gmock gmock-devel monodevelop 
 ```
 The googletest-related libraries are built from source and installed
 under `/usr/local`:
