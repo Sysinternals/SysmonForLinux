@@ -1,4 +1,8 @@
-# Sysmon For Linux install and build instructions [![Build Status](https://dev.azure.com/sysinternals/Tools/_apis/build/status/Sysinternals.SysmonForLinux?repoName=Sysinternals%2FSysmonForLinux&branchName=main)](https://dev.azure.com/sysinternals/Tools/_build/latest?definitionId=340&repoName=Sysinternals%2FSysmonForLinux&branchName=main)
+[![Build Status](https://dev.azure.com/sysinternals/Tools/_apis/build/status/Sysinternals.SysmonForLinux?repoName=Sysinternals%2FSysmonForLinux&branchName=main)](https://dev.azure.com/sysinternals/Tools/_build/latest?definitionId=340&repoName=Sysinternals%2FSysmonForLinux&branchName=main)
+
+# Sysmon for Linux
+Sysmon for Linux is a tool that monitors and logs system activity including process lifetime, network connections, file system writes, and more. Sysmon works across reboots and uses advanced filtering to help identify malicious activity as well as how intruders and malware operate on your network.
+Sysmon for Linux is part of [Sysinternals](https://sysinternals.com). 
 
 ## Installation
 The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
