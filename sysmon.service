@@ -20,7 +20,7 @@ After=syslog.service
 Type=forking
 User=root
 WorkingDirectory=/opt/sysmon
-ExecStart=/opt/sysmon/sysmon -i /opt/sysmon/config.xml -service
+ExecStart=/opt/sysmon/sysmon -i /opt/sysmon/config.xml -service -socket /var/run/sysmon.sock -json
 
 [Install]
 WantedBy=multi-user.target

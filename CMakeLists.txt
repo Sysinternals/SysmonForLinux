@@ -111,6 +111,8 @@ add_executable(sysmon
                linuxWideChar.c
                linuxHelpers.cpp
                networkTracker.cpp
+               frozen.c
+               frozen.h
                outputxml.c
                installer.c
                "${SYSMON_COMMON_SOURCE_DIR}/usage.c"
@@ -323,6 +325,8 @@ add_executable(sysmonUnitTests
                linuxWideChar.c
                linuxHelpers.cpp
                outputxml.c
+               frozen.c
+               frozen.h
                hexdump.c
                "${SYSMON_COMMON_SOURCE_DIR}/parsecommandline.c"
                "${SYSMON_COMMON_SOURCE_DIR}/xml.cpp"
@@ -423,7 +427,7 @@ add_custom_command(OUTPUT sysmonmsgop.c
                    DEPENDS sysmonmsgop.man
                    )
 
-# 
+#
 # convert embedded files to objects for linking with the sysmon binary
 #
 add_custom_command(OUTPUT manifest.xml.o
@@ -537,4 +541,3 @@ foreach(EBPF_PROG IN LISTS EBPF_PROGS)
     # add ebpf programs to clean
     set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
 endforeach(EBPF_PROG)
-

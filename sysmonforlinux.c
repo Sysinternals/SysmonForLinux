@@ -50,6 +50,10 @@
 #include "eula.h"
 #include "networkTracker.h"
 #include "installer.h"
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <pthread.h>
+#include "outputxml.h"
 
 #define EVENT_BUFFER_SIZE (49 * 1024)
 
@@ -72,6 +76,14 @@ BOOLEAN                 g_DebugMode = FALSE;
 BOOLEAN                 g_DebugModeVerbose = FALSE;
 CRITICAL_SECTION        g_DebugModePrintCriticalSection;
 
+#define LISTEN_BACKLOG 50
+
+// A Unix domain socket to send events on - this saves having to write
+// the syslog and fill up the disk un-necessarily.
+int g_SysmonSocket;
+char *g_SocketPath = NULL;
+pthread_mutex_t mutex;
+
 typedef TCHAR _bstr_t;
 
 bool CreateNetworkEvent( DWORD processId, DWORD threadId, EVENT_TYPE_NETWORK type, bool isTcp,
@@ -80,6 +92,8 @@ bool CreateNetworkEvent( DWORD processId, DWORD threadId, EVENT_TYPE_NETWORK typ
                         bool dstIsIpV4, const BYTE * dstAddr, WORD dstPort,
                         const void * const stackEntries[], DWORD stackCnt,
                         const _bstr_t *details );
+
+void *CreateUnixSocket();
 
 //--------------------------------------------------------------------
 //
@@ -176,8 +190,28 @@ int mapFds[sizeof(mapObjects) / sizeof(*mapObjects)];
 //--------------------------------------------------------------------
 VOID syslogHelper( int priority, const char* fmt, const char *msg )
 {
+    int err;
+
     if (fmt == NULL || msg == NULL) {
         fprintf(stderr, "syslogHelper invalid params\n");
+        return;
+    }
+
+    // We are in socket mode, do not write the syslog, but send to the
+    // socket instead.
+    if (g_SocketPath != NULL) {
+        pthread_mutex_lock(&mutex);
+        if (g_SysmonSocket > 0) {
+            err = write(g_SysmonSocket, msg, strlen(msg));
+            if (err < 0) {
+                // Write error - close the socket.
+                close(g_SysmonSocket);
+                g_SysmonSocket = -1;
+                pthread_mutex_unlock(&mutex);
+                return;
+            }
+        }
+        pthread_mutex_unlock(&mutex);
         return;
     }
 
@@ -193,12 +227,24 @@ VOID syslogHelper( int priority, const char* fmt, const char *msg )
 //--------------------------------------------------------------------
 void telemetryReady()
 {
+    pthread_t                   tid;
+    int                         err;
+
     if( OPT_SET( ConfigDefault ) ) {
         SendConfigEvent( "Defaults", NULL );
     } else if( configFile ) {
         SendConfigEvent( configFile, NULL );
     } else {
         SendConfigEvent( GetCommandLine(), NULL );
+    }
+
+    // We are in socket mode, create the socket and start listening on
+    // it.
+    if (g_SocketPath != NULL) {
+        err = pthread_create(&tid, NULL, &CreateUnixSocket, NULL);
+        if (err != 0) {
+            printf("\ncan't create thread :[%s]", strerror(err));
+        }
     }
 
     SendStateEvent("Started", STRFILEVER);
@@ -631,11 +677,11 @@ void intHandler(int code)
 //--------------------------------------------------------------------
 void
 PrintBanner(
-		   const int* argc,
-		   const char *argv[]
-		   )
+           const int* argc,
+           const char *argv[]
+           )
 {
-	printf("\n");
+    printf("\n");
     printf("Sysmon v%s - Monitors system events\n", STRFILEVER);
     printf("%s\n", VER_COMPANY);
     printf("%s\n", VER_COPYRIGHT);
@@ -703,6 +749,65 @@ EulaAccepted()
         return FALSE;
     }
 }
+
+#define SERVER_SOCK_FILE "/var/run/sysmon.sock"
+#define LISTEN_BACKLOG 50
+
+// Runs in a different thread accepting connections on the socket.
+void *
+CreateUnixSocket() {
+    int sfd, cfd;
+    struct sockaddr_un my_addr, peer_addr;
+    socklen_t peer_addr_size;
+
+    if (g_SocketPath == NULL) {
+        printf("Unix socket path not set!");
+        return NULL;
+    }
+
+    sfd = socket(PF_UNIX, SOCK_STREAM, 0);
+    if (sfd < 0) {
+        perror("socket");
+        return NULL;
+    }
+
+    memset(&my_addr, 0, sizeof(my_addr));
+
+    my_addr.sun_family = AF_UNIX;
+    strcpy(my_addr.sun_path, g_SocketPath);
+
+    unlink(SERVER_SOCK_FILE);
+    if (bind(sfd, (struct sockaddr *)&my_addr, sizeof(my_addr)) < 0) {
+        perror("bind");
+        return NULL;
+    }
+
+    if (listen(sfd, LISTEN_BACKLOG) == -1) {
+        perror("listen");
+        return NULL;
+    }
+
+    while(1) {
+        peer_addr_size = sizeof(peer_addr);
+        cfd = accept(sfd, (struct sockaddr *) &peer_addr,
+                     &peer_addr_size);
+        if (cfd == -1) {
+            continue;
+        }
+
+        // Close the old connection - only allow one reader at the
+        // time.
+        pthread_mutex_lock(&mutex);
+        if (g_SysmonSocket > 0) {
+            close(g_SysmonSocket);
+        }
+        g_SysmonSocket = cfd;
+
+        pthread_mutex_unlock(&mutex);
+    }
+}
+
+
 
 //--------------------------------------------------------------------
 //
@@ -919,7 +1024,7 @@ bool setConfigFromStoredArgv(
     //
     // Parse the command line using the data from manifest.xml
     //
-    if( !ParseCommandLine( argc, argv, &rules, &rulesSize, 
+    if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
             &parsedConfigFile, configHash, _countof( configHash ) ) ) {
         fprintf( stderr, "Could not parse new rules\n" );
         free( argv );
@@ -1027,6 +1132,40 @@ HasCustomConfiguration(
     return FALSE;
 }
 
+/* Sysmon uses manifest.xml to define both rule format *and* command
+   line options. This makes it difficult to add new command line
+   options specific to the linux version without affecting the entire
+   schema (and advancing its version).
+
+   To work around this inflexible design, we just identify the options
+   we care about and strip them from the argv before handing to the
+   sysmon parser.
+*/
+int parseCommandLine(int argc, char *argv[]) {
+    int i = 0; // reader
+    int j = 0; // writer
+    for(i = 0; i<argc; i++) {
+        if(!strcmp(argv[i], "-socket") && i+1 <= argc) {
+            i++;
+            g_SocketPath = argv[i];
+            printf("Listening to socket connections on %s\n", g_SocketPath);
+
+            // Skip these args.
+            continue;
+        }
+
+        if(!strcmp(argv[i], "-json")) {
+            SetJSONOutput();
+            continue;
+        }
+
+        argv[j] = argv[i];
+        j++;
+    };
+    return j;
+}
+
+
 //--------------------------------------------------------------------
 //
 // main
@@ -1042,11 +1181,11 @@ main(
 )
 {
     PVOID                       rules = NULL;
-	ULONG                       rulesSize = 0;
+    ULONG                       rulesSize = 0;
     PTCHAR                      debugModeOption;
-	TCHAR                       configHash[256] = { 0 };
-	CONSOLE_SCREEN_BUFFER_INFO	csbi;
-	struct 	                    winsize winSize;
+    TCHAR                       configHash[256] = { 0 };
+    CONSOLE_SCREEN_BUFFER_INFO  csbi;
+    struct                      winsize winSize;
     pid_t                       pid;
     bool                        forceUninstall = false;
     bool                        activeSyscalls[SYSCALL_ARRAY_SIZE];
@@ -1058,52 +1197,56 @@ main(
     //
     SetBootTime();
 
-	LIBXML_TEST_VERSION
+    LIBXML_TEST_VERSION
 
     umask(SYSMON_UMASK);
 
-	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &winSize) == 0) {
-		csbi.dwSize.X = winSize.ws_col;
-	} else {
-		csbi.dwSize.X = 80;
-	}
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &winSize) == 0) {
+        csbi.dwSize.X = winSize.ws_col;
+    } else {
+        csbi.dwSize.X = 80;
+    }
 
-	PrintBanner( &argc, (const char **)argv );
+    PrintBanner( &argc, (const char **)argv );
 
-	//
-	// Is it just looking for help
-	//
-	if( argc >= 2 &&
-		argv[1][0] == '-' &&
-		( argv[1][1] == '?' ||
-		  !strcasecmp( argv[1] + 1, "h" ) ||
-		  !strcasecmp( argv[1] + 1, "help" ) ) ) {
+    //
+    // Is it just looking for help
+    //
+    if( argc >= 2 &&
+        argv[1][0] == '-' &&
+        ( argv[1][1] == '?' ||
+          !strcasecmp( argv[1] + 1, "h" ) ||
+          !strcasecmp( argv[1] + 1, "help" ) ) ) {
 
-		if( argc > 2 ) {
+        if( argc > 2 ) {
 
-			if( !strcasecmp( argv[2], "config" ) || !strcasecmp( argv[2], "configuration" ) ) {
+            if( !strcasecmp( argv[2], "config" ) || !strcasecmp( argv[2], "configuration" ) ) {
 
-				ConfigUsage( &csbi );
-				return ERROR_SUCCESS;
-			}
-		}
+                ConfigUsage( &csbi );
+                return ERROR_SUCCESS;
+            }
+        }
 
-		//
-		// Expected behaviour so return success
-		//
-		Usage( argv[0], &csbi );
-		return ERROR_SUCCESS;
-	}
+        //
+        // Expected behaviour so return success
+        //
+        Usage( argv[0], &csbi );
+        return ERROR_SUCCESS;
+    }
 
-	//
-	// Parse the command line using the data from manifest.xml
-	//
-	if( !ParseCommandLine( argc, argv, &rules, &rulesSize, 
-					&configFile, configHash, _countof( configHash) ) ) {
 
-		return Usage( argv[0], &csbi );
-	}
- 
+    // Filter out our command line args
+    argc = parseCommandLine(argc, argv);
+
+    //
+    // Parse the command line using the data from manifest.xml
+    //
+    if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
+                    &configFile, configHash, _countof( configHash) ) ) {
+
+        return Usage( argv[0], &csbi );
+    }
+
     //
     // Initialize and load any user-specified max field sizes
     //
@@ -1127,7 +1270,7 @@ main(
         return ERROR_INVALID_PARAMETER;
     }
 
-    if( OPT_SET(ClipboardInstance) || 
+    if( OPT_SET(ClipboardInstance) ||
         OPT_SET(DriverName) ||
         OPT_SET(ArchiveDirectory) ||
         OPT_SET(CaptureClipboard) ||
@@ -1142,7 +1285,7 @@ main(
         g_DebugMode = TRUE;
         debugModeOption = OPT_VALUE( DebugMode );
         if( debugModeOption ) {
-            
+
             if( _tcsicmp( debugModeOption, _T("verbose") ) ) {
                 _tprintf( _T( "Possible options for DebugMode: verbose\n\n" ) );
                 return ERROR_INVALID_PARAMETER;
@@ -1182,7 +1325,7 @@ main(
 
     if ( OPT_SET(Configuration) ) {
         if( OPT_VALUE(Configuration) == NULL ) {
-            
+
             nothingToChange = !HasCustomConfiguration();
         } else {
 
@@ -1299,7 +1442,7 @@ main(
         // If Sysmon is not currently running as a service (e.g. started by
         // systemd or init.d) then start it as a service by replacing this
         // execution with the shell invoker that starts the service.  If
-        // Sysmon is already running as a service, or it cannot start as a 
+        // Sysmon is already running as a service, or it cannot start as a
         // service (missing systemd and missing init.d) then continue.
         //
         startSysmonService();
@@ -1313,7 +1456,7 @@ main(
         setConfigFromStoredArgv( &configFile, activeSyscalls );
 
 
-        const ebpfTelemetryObject   kernelObjs[] = 
+        const ebpfTelemetryObject   kernelObjs[] =
         {
             {
                 KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
@@ -1465,6 +1608,11 @@ main(
             exit(*retPtr);
         }
 
+        if (pthread_mutex_init(&mutex, NULL) != 0) {
+            printf("\n mutex init failed\n");
+            return ERROR_INVALID_PARAMETER;
+        }
+
         *retPtr = telemetryStart( &sysmonConfig, handleEvent, handleLostEvents, telemetryReady, configChange,
                 NULL, (const char **)argv, mapFds );
         sem_post(startupSem);
@@ -1477,4 +1625,3 @@ main(
     Usage( argv[0], &csbi );
     return ERROR_INVALID_PARAMETER;
 }
-

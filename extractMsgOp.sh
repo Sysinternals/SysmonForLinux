@@ -31,6 +31,7 @@ if [[ "$1" == "HEADER" ]]; then
     echo "#pragma once"
     echo ""
     echo "extern const GUID SYSMON_PROVIDER;"
+    echo "extern const char* SYSMON_PROVIDER_GUID;"
     echo "#define SYSMON_CHANNEL 0x10"
     echo ""
     grep '<task name' $SYSMONMSGOP | sed -e 's/^.*symbol="\([^"]*\)".*\(..\)}".*$/#define \1 0x\2/'
@@ -66,4 +67,3 @@ else
     grep '<event symbol=' $SYSMONMSGOP | grep "win:Error" | sed -e 's/^.*symbol="\([^"]*\)".*value="\([^"]*\).*version="\([^"]*\)".*$/const EVENT_DESCRIPTOR \1 = {\2, \3, 0x10, 0x2, 0x0, \2, 0x8000000000000000};/'
     grep '<event symbol=' $SYSMONMSGOP | grep "win:Informational" | sed -e 's/^.*symbol="\([^"]*\)".*value="\([^"]*\).*version="\([^"]*\)".*$/const EVENT_DESCRIPTOR \1 = {\2, \3, 0x10, 0x4, 0x0, \2, 0x8000000000000000};/'
 fi
-
