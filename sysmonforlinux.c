@@ -115,44 +115,44 @@ const ebpfSyscallTPprog         TPexitProgs[] =
 
 const ebpfSyscallRTPprog        RTPenterProgs[] =
 {
-    {"sysmon/generic/rawEnter", EBPF_GENERIC_SYSCALL}
+    {"genericRawEnter", EBPF_GENERIC_SYSCALL}
 };
 
 const ebpfSyscallRTPprog        RTPexitProgs[] =
 {
-    {"sysmon/ProcCreate/rawExit", __NR_execve},
-    {"sysmon/ProcCreate/rawExit", __NR_execveat},
-    {"sysmon/FileCreate/rawExit", __NR_creat},
-    {"sysmon/FileOpen/rawExit", __NR_open},
-    {"sysmon/FileOpen/rawExit", __NR_openat},
-    {"sysmon/FileOpen/rawExit", __NR_RAWACCESS},
-    {"sysmon/FileOpen/rawExit", __NR_CREATE},
-    {"sysmon/FileDelete/rawExit", __NR_unlink},
-    {"sysmon/FileDeleteAt/rawExit", __NR_unlinkat},
-    {"sysmon/FileDeleteAtCwd/rawExit", __NR_unlinkat},
-    {"sysmon/TCPaccept/rawExit", __NR_accept},
-    {"sysmon/TCPaccept/rawExit", __NR_accept4},
-    {"sysmon/TCPaccept/rawExit", __NR_NETWORK},
-    {"sysmon/ProcAccessed/rawExit", __NR_ptrace},
-    {"sysmon/UDPrecv/rawExit", __NR_recvfrom},
-    {"sysmon/UDPrecv/rawExit", __NR_recvmsg},
-    {"sysmon/UDPrecv/rawExit", __NR_recvmmsg},
-    {"sysmon/UDPrecv/rawExit", __NR_read},
-    {"sysmon/CloseFD/rawExit", __NR_close}
+    {"ProcCreateRawExit", __NR_execve},
+    {"ProcCreateRawExit", __NR_execveat},
+    {"FileCreateRawExit", __NR_creat},
+    {"FileOpenRawExit", __NR_open},
+    {"FileOpenRawExit", __NR_openat},
+    {"FileOpenRawExit", __NR_RAWACCESS},
+    {"FileOpenRawExit", __NR_CREATE},
+    {"FileDeleteRawExit", __NR_unlink},
+    {"FileDeleteAtRawExit", __NR_unlinkat},
+    {"FileDeleteAtCwdRawExit", __NR_unlinkat},
+    {"TCPacceptRawExit", __NR_accept},
+    {"TCPacceptRawExit", __NR_accept4},
+    {"TCPacceptRawExit", __NR_NETWORK},
+    {"ProcAccessedRawExit", __NR_ptrace},
+    {"UDPrecvRawExit", __NR_recvfrom},
+    {"UDPrecvRawExit", __NR_recvmsg},
+    {"UDPrecvRawExit", __NR_recvmmsg},
+    {"UDPrecvRawExit", __NR_read},
+    {"CloseFDRawExit", __NR_close}
 };
 
 const ebpfTracepointProg        otherTPprogs4_15[] =
 {
-    {"sched", "sched_process_exit", "sysmon/sched_process_exit", __NR_PROCTERM},
-    {"tcp", "tcp_set_state", "sysmon/tcp_set_state", __NR_NETWORK},
-    {"skb", "consume_skb", "sysmon/consume_skb", __NR_NETWORK}
+    {"sched", "sched_process_exit", "ProcTerminated", __NR_PROCTERM},
+    {"tcp", "tcp_set_state", "tracepoint/tcp/tcp_set_state", __NR_NETWORK},
+    {"skb", "consume_skb", "UDPsend", __NR_NETWORK}
 };
 
 const ebpfTracepointProg        otherTPprogs4_16[] =
 {
-    {"sched", "sched_process_exit", "sysmon/sched_process_exit", __NR_PROCTERM},
-    {"sock", "inet_sock_set_state", "sysmon/inet_sock_set_state", __NR_NETWORK},
-    {"skb", "consume_skb", "sysmon/consume_skb", __NR_NETWORK}
+    {"sched", "sched_process_exit", "ProcTerminated", __NR_PROCTERM},
+    {"sock", "inet_sock_set_state", "TCPconnection", __NR_NETWORK},
+    {"skb", "consume_skb", "UDPsend", __NR_NETWORK}
 };
 
 const ebpfTelemetryMapObject    mapObjects[] =

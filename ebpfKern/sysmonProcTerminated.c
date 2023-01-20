@@ -40,7 +40,7 @@ struct tracepoint__sched__sched_process_exit {
 };
 
 // process terminated
-SEC("sysmon/sched_process_exit")
+SEC("tracepoint/sched/sched_process_exit")
 __attribute__((flatten))
 int ProcTerminated(struct tracepoint__sched__sched_process_exit *args)
 {

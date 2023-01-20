@@ -35,6 +35,7 @@ static inline char* set_process_ext(
     const void *task
     )
 {
+     
     char *ptr = NULL;
     uint64_t extLen = 0;
 
@@ -63,9 +64,13 @@ static inline char* set_process_ext(
                  :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
                  );
 
-    extLen = copyCommandline(ptr, task, config);
+    //extLen = copyCommandline(ptr, task, config);
+    extLen = ((struct task_struct*) task)->mm->arg_end - ((struct task_struct*) task)->mm->arg_start;
+    bpf_probe_read(ptr, extLen, ((struct task_struct*) task)->mm->arg_start);
+    ptr[extLen]=0;
     event->m_Extensions[PC_CommandLine] = extLen;
     ptr += (extLen & (CMDLINE_MAX_LEN - 1));
+
     extLen = derefFilepathInto(ptr, task, config->offsets.pwd_path, config);
     event->m_Extensions[PC_CurrentDirectory] = extLen;
     ptr += (extLen & (PATH_MAX - 1));

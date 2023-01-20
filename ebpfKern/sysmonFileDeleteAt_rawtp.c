@@ -25,7 +25,7 @@
 #include "sysmonHelpers.c"
 #include "sysmonFileDeleteAt.c"
 
-SEC("sysmon/FileDeleteAt/rawExit")
+SEC("raw_tracepoint/sys_exit")
 __attribute__((flatten))
 int FileDeleteAtRawExit(struct bpf_our_raw_tracepoint_args *ctx)
 {

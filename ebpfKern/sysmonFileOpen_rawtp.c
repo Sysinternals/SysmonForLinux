@@ -25,7 +25,7 @@
 #include "sysmonHelpers.c"
 #include "sysmonFileOpen.c"
 
-SEC("sysmon/FileOpen/rawExit")
+SEC("raw_tracepoint/sys_exit")
 __attribute__((flatten))
 int FileOpenRawExit(struct bpf_our_raw_tracepoint_args *ctx)
 {

@@ -50,7 +50,7 @@ static inline bool set_eventArgs(unsigned long *a, const struct pt_regs *regs)
 }
 
  
-SEC("sysmon/generic/rawEnter")
+SEC("raw_tracepoint/sys_enter")
 __attribute__((flatten))
 int genericRawEnter(struct bpf_our_raw_tracepoint_args *ctx)
 {

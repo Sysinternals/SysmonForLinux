@@ -46,7 +46,7 @@ struct tracepoint__tcp__tcp_set_state {
 };
 
 // network connection state change
-SEC("sysmon/tcp_set_state")
+SEC("tracepoint/tcp/tcp_set_state")
 __attribute__((flatten))
 int TCPconnectionOld(struct tracepoint__tcp__tcp_set_state *args)
 {

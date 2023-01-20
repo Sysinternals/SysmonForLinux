@@ -39,7 +39,7 @@ struct tracepoint__skb_consume_skb {
 };
 
 // network connection state change
-SEC("sysmon/consume_skb")
+SEC("tracepoint/skb/consume_skb")
 __attribute__((flatten))
 int UDPsend(struct tracepoint__skb_consume_skb *args)
 {
