@@ -29,6 +29,8 @@
 #include "networkTracker.h"
 #include "linuxHelpers.h"
 
+#include "missingdefs.h"
+
 extern int mapFds[];
 
 //--------------------------------------------------------------------

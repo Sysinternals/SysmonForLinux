@@ -27,11 +27,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stddef.h>
+//#include <sys/types.h>
+//#include <unistd.h>
+//#include <stddef.h>
 #include <linux/limits.h>
 #include <ctype.h>
+
+typedef long unsigned int size_t;
 
 //
 // Basics
@@ -578,20 +580,6 @@ typedef struct {
     ULONG                   m_Extensions[LINUX_FILE_OPEN_ExtMax];
 } SYSMON_LINUX_FILE_OPEN, *PSYSMON_LINUX_FILE_OPEN;
 
-typedef enum {
-    TCP_ESTABLISHED = 1,
-    TCP_SYN_SENT = 2,
-    TCP_SYN_RECV = 3,
-    TCP_FIN_WAIT1 = 4,
-    TCP_FIN_WAIT2 = 5,
-    TCP_TIME_WAIT = 6,
-    TCP_CLOSE = 7,
-    TCP_CLOSE_WAIT = 8,
-    TCP_LAST_ACK = 9,
-    TCP_LISTEN = 10,
-    TCP_CLOSING = 11,
-    TCP_NEW_SYN_RECV = 12
-} state;
 
 typedef struct {
     ULONG                   m_ProcessId;

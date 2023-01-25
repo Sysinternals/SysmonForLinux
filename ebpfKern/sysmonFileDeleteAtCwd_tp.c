@@ -26,6 +26,7 @@
 #include "sysmonHelpers.c"
 #include "sysmonFileDeleteAtCwd.c"
 
+#include "missingdefs.h"
 
 // sys_exit
 SEC("sysmon/FileDeleteAtCwd/exit")

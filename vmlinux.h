@@ -21334,7 +21334,7 @@ struct physdev_apic {
 	uint32_t value;
 };
 
-typedef long unsigned int uintptr_t;
+//typedef long unsigned int uintptr_t;
 
 struct xen_pmu_amd_ctxt {
 	uint32_t counters;
@@ -75034,7 +75034,7 @@ typedef uint32_t U32;
 
 typedef uint64_t U64;
 
-typedef uintptr_t uptrval;
+typedef long unsigned int uptrval;
 
 typedef enum {
 	noDict = 0,
@@ -75230,7 +75230,7 @@ typedef enum {
 
 typedef int16_t S16;
 
-typedef uintptr_t uPtrDiff;
+typedef long unsigned int uPtrDiff;
 
 typedef struct {
 	size_t state;

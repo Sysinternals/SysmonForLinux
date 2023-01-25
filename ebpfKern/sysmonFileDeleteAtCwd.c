@@ -28,6 +28,8 @@
 //
 //====================================================================
 
+#include "missingdefs.h"
+
 __attribute__((always_inline))
 static inline char* set_FileDeleteAtCwd_info(
     PSYSMON_EVENT_HEADER eventHdr,

@@ -28,7 +28,8 @@
 //
 //====================================================================
 
-#include <linux/ptrace.h>
+#include "missingdefs.h"
+
 
 __attribute__((always_inline))
 static inline char* set_ProcAccessed_info(

@@ -64,9 +64,9 @@ static inline char* set_process_ext(
                  :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
                  );
 
-    //extLen = copyCommandline(ptr, task, config);
-    extLen = ((struct task_struct*) task)->mm->arg_end - ((struct task_struct*) task)->mm->arg_start;
-    bpf_probe_read(ptr, extLen, ((struct task_struct*) task)->mm->arg_start);
+    extLen = copyCommandline(ptr, task, config);
+    //extLen = ((struct task_struct*) task)->mm->arg_end - ((struct task_struct*) task)->mm->arg_start;
+    //bpf_probe_read(ptr, extLen, ((struct task_struct*) task)->mm->arg_start);
     ptr[extLen]=0;
     event->m_Extensions[PC_CommandLine] = extLen;
     ptr += (extLen & (CMDLINE_MAX_LEN - 1));

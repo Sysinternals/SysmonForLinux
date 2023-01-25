@@ -51,6 +51,8 @@
 #include "networkTracker.h"
 #include "installer.h"
 
+#include "missingdefs.h"
+
 #define EVENT_BUFFER_SIZE (49 * 1024)
 
 #define STARTUP_SEM_NAME "/sysmon-startup"
