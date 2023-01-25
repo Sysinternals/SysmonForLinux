@@ -31,23 +31,26 @@
 #ifndef SYSMON_EBPF_COMMON_H
 #define SYSMON_EBPF_COMMON_H
 
-#include "vmlinux.h"
-#include <sysinternalsEBPF_common.h>
-
 #define SYSMON_EBPF
 
+#ifdef SYSMON_EBPF_CO_RE
+#include "vmlinux.h"
+#else
+#include <linux/version.h>
+#include <linux/bpf.h>
+#include <linux/socket.h>
+#include <linux/in.h>
+#include <linux/in6.h>
+#include <linux/fcntl.h>
+#include <sys/socket.h>
+#include <linux/string.h>
+#include <asm/ptrace.h>
+#endif
+
+#include <sysinternalsEBPF_common.h>
 #include <stdint.h>
-//#include <linux/version.h>
-//#include <linux/bpf.h>
 #include <bpf_helpers.h>
-//#include <linux/socket.h>
-//#include <linux/in.h>
-//#include <linux/in6.h>
-//#include <linux/fcntl.h>
-//#include <sys/socket.h>
-//#include <linux/string.h>
 #include <asm/unistd_64.h>
-//#include <asm/ptrace.h>
 #include <sysinternalsEBPFshared.h>
 #include "sysmon_defs.h"
 

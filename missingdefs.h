@@ -27,12 +27,16 @@
 // problem and the current solution is to define those types seperately. 
 // This files contains all the defs that are missing. 
 //
+// For more detail, please see:
+// https://lore.kernel.org/bpf/CAO658oV9AAcMMbVhjkoq5PtpvbVf41Cd_TBLCORTcf3trtwHfw@mail.gmail.com/ 
+//
 //====================================================================
 
 #pragma once
 
-
-typedef enum {
+// If we're not compiling eBPF programs, the below will not be defined. 
+#ifndef SYSMON_EBPF_CO_RE
+enum {
     TCP_ESTABLISHED = 1,
     TCP_SYN_SENT = 2,
     TCP_SYN_RECV = 3,
@@ -45,12 +49,25 @@ typedef enum {
     TCP_LISTEN = 10,
     TCP_CLOSING = 11,
     TCP_NEW_SYN_RECV = 12
-} state;
+};
+#endif
 
+#ifndef AT_FDCWD
 #define AT_FDCWD		    -100
+#endif
+
+#ifndef AT_REMOVEDIR
 #define AT_REMOVEDIR		0x200 
+#endif
+
+#ifndef O_CREAT
 #define O_CREAT            0100
+#endif 
 
+#ifndef PTRACE_ATTACH
 #define PTRACE_ATTACH              16
-#define PTRACE_SEIZE             0x4206
+#endif
 
+#ifndef PTRACE_SEIZE
+#define PTRACE_SEIZE             0x4206
+#endif

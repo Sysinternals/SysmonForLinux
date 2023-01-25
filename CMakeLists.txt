@@ -491,6 +491,7 @@ set(CLANG_DEFINES -D __KERNEL__
                   -D __BPF_TRACING__
                   -D __TARGET_ARCH_x86
                   -D __linux__
+                  -D SYSMON_EBPF_CO_RE
                   )
 if (DEBUG_K)
     message("Using DEBUG_K Option...")
