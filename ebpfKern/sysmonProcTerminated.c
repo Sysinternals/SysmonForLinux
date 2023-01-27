@@ -80,9 +80,9 @@ int ProcTerminated(struct tracepoint__sched__sched_process_exit *args)
 
     // Insert the UID as the SID
     if (task) {
-        cred = (const void *)derefPtr(task, config->offsets.cred);
-        if (cred) {
-            *(uint64_t *)ptr = derefPtr(cred, config->offsets.cred_uid) & 0xFFFFFFFF;
+        *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
+        if(*(uint64_t *)ptr!=0)
+        {
             event->m_Extensions[PT_Sid] = sizeof(uint64_t);
             ptr += sizeof(uint64_t);
         }

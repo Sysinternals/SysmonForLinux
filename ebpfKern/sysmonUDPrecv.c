@@ -88,7 +88,11 @@ static inline char* set_UDPrecv_info(
         if (inode == NULL)
             return (char *)eventHdr;
 
+#ifdef EBPF_CO_RE
+        mode = BPF_CORE_READ((struct inode *)inode, i_mode);
+#else
         bpf_probe_read(&mode, sizeof(mode), inode + config->offsets.inode_mode[0]);
+#endif
 
         // and a socket action must be on a socket
         if ((mode & S_IFMT) != S_IFSOCK)

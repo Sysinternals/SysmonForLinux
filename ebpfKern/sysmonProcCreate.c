@@ -37,7 +37,7 @@ static inline char* set_process_ext(
     const void *task
     )
 {
-     
+
     char *ptr = NULL;
     uint64_t extLen = 0;
 
@@ -49,7 +49,7 @@ static inline char* set_process_ext(
     event->m_Extensions[PC_Sid] = sizeof(uint64_t);
     ptr += sizeof(uint64_t);
 
-    extLen = derefFilepathInto(ptr, task, config->offsets.exe_path, config);
+    extLen = copyExePath(ptr, task, config);
     event->m_Extensions[PC_ImagePath] = extLen;
 
     // Following piece of asm is required because without it clang puts extLen
@@ -70,7 +70,7 @@ static inline char* set_process_ext(
     event->m_Extensions[PC_CommandLine] = extLen;
     ptr += (extLen & (CMDLINE_MAX_LEN - 1));
 
-    extLen = derefFilepathInto(ptr, task, config->offsets.pwd_path, config);
+    extLen = copyPwdPath(ptr, task, config);
     event->m_Extensions[PC_CurrentDirectory] = extLen;
     ptr += (extLen & (PATH_MAX - 1));
 
@@ -129,7 +129,7 @@ static inline char* set_ProcCreate_info(
     // get the ppid
 #ifdef EBPF_CO_RE
     event->m_ParentProcessId = BPF_CORE_READ((struct task_struct *)p_task, pid);
-#else    
+#else
     event->m_ParentProcessId = (uint32_t)derefPtr(p_task, config->offsets.pid);
 #endif
 
@@ -176,8 +176,8 @@ static inline char* set_ProcCreate_info(
 #ifdef EBPF_CO_RE
     event->m_CreateTime.QuadPart = BPF_CORE_READ((struct task_struct *)task, start_time);
 #else
-    event->m_CreateTime.QuadPart = (derefPtr(task, config->offsets.start_time)); 
-#endif    
+    event->m_CreateTime.QuadPart = (derefPtr(task, config->offsets.start_time));
+#endif
     event->m_CreateTime.QuadPart = (event->m_CreateTime.QuadPart + config->bootNsSinceEpoch) / 100;
 
     return set_process_ext(event, config, task);

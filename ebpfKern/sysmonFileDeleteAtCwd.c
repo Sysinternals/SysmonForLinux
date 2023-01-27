@@ -78,7 +78,6 @@ static inline char* set_FileDeleteAtCwd_info(
 
     event->m_HashType = 0;
     event->m_IsExecutable = 0;
-    cred = (const void *)derefPtr(task, config->offsets.cred);
     event->m_Archived[0] = 0x00;
     event->m_TrackerId = 0;
 
@@ -90,8 +89,9 @@ static inline char* set_FileDeleteAtCwd_info(
     memset(event->m_Extensions, 0, sizeof(event->m_Extensions));
 
     // Insert the UID as the SID
-    if (cred) {
-        *(uint64_t *)ptr = derefPtr(cred, config->offsets.cred_uid) & 0xFFFFFFFF;
+    *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
+    if(*(uint64_t *)ptr!=0)
+    {
         event->m_Extensions[FD_Sid] = sizeof(uint64_t);
         ptr += sizeof(uint64_t);
     }
@@ -107,7 +107,7 @@ static inline char* set_FileDeleteAtCwd_info(
 
     if (relative) {
         // relative to current directory
-        extLen = derefFilepathInto(ptr, task, config->offsets.pwd_path, config);
+        extLen = copyPwdPath(ptr, task, config);
         if (extLen <= 0)
             return (char *)eventHdr;
         extLen &= (PATH_MAX -1);
@@ -128,7 +128,7 @@ static inline char* set_FileDeleteAtCwd_info(
         ptr += (extLen & (PATH_MAX - 1));
     }
 
-    extLen = derefFilepathInto(ptr, task, config->offsets.exe_path, config);
+    extLen = copyExePath(ptr, task, config);
     event->m_Extensions[FD_ImagePath] = extLen;
     extLen &= (MAX_PATH -1);
     ptr += extLen;

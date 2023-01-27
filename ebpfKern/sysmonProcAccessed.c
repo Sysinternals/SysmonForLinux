@@ -85,14 +85,14 @@ static inline char* set_ProcAccessed_info(
 
     ptr = (char *)(event + 1);
     memset(event->m_Extensions, 0, sizeof(event->m_Extensions));
-    extLen = derefFilepathInto(ptr, task, config->offsets.exe_path, config);
+    extLen = copyExePath(ptr, task, config);
     event->m_Extensions[PA_ClientImage] = extLen;
     ptr += (extLen & (PATH_MAX - 1));
 
     // Insert the UID as the SID
-    cred = (const void *)derefPtr(task, config->offsets.cred);
-    if (cred) {
-        *(uint64_t *)ptr = derefPtr(cred, config->offsets.cred_uid) & 0xFFFFFFFF;
+    *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
+    if(*(uint64_t *)ptr!=0)
+    {
         event->m_Extensions[PA_SidSource] = sizeof(uint64_t);
         ptr += sizeof(uint64_t);
     }
