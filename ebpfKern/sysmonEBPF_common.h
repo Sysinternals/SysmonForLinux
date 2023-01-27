@@ -33,7 +33,7 @@
 
 #define SYSMON_EBPF
 
-#ifdef SYSMON_EBPF_CO_RE
+#ifdef EBPF_CO_RE
 #include "vmlinux.h"
 #else
 #include <linux/version.h>
@@ -50,6 +50,7 @@
 #include <sysinternalsEBPF_common.h>
 #include <stdint.h>
 #include <bpf_helpers.h>
+#include <bpf/bpf_core_read.h>
 #include <asm/unistd_64.h>
 #include <sysinternalsEBPFshared.h>
 #include "sysmon_defs.h"

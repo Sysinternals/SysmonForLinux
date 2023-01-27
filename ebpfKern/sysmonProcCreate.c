@@ -28,6 +28,8 @@
 //
 //====================================================================
 
+#include <inttypes.h>
+
 __attribute__((always_inline))
 static inline char* set_process_ext(
     PSYSMON_PROCESS_CREATE event,
@@ -65,9 +67,6 @@ static inline char* set_process_ext(
                  );
 
     extLen = copyCommandline(ptr, task, config);
-    //extLen = ((struct task_struct*) task)->mm->arg_end - ((struct task_struct*) task)->mm->arg_start;
-    //bpf_probe_read(ptr, extLen, ((struct task_struct*) task)->mm->arg_start);
-    ptr[extLen]=0;
     event->m_Extensions[PC_CommandLine] = extLen;
     ptr += (extLen & (CMDLINE_MAX_LEN - 1));
 
@@ -118,18 +117,31 @@ static inline char* set_ProcCreate_info(
     event->m_ProcessId = pidTid >> 32;
 
     // set the process objects (task ptrs)
+#ifdef EBPF_CO_RE
+    p_task = BPF_CORE_READ((struct task_struct *)task, parent);
+#else
     p_task = (const void *)derefPtr(task, config->offsets.parent);
+#endif
 
     event->m_ProcessObject = (PVOID)task;
     event->m_ParentProcessObject = (PVOID)p_task;
 
     // get the ppid
+#ifdef EBPF_CO_RE
+    event->m_ParentProcessId = BPF_CORE_READ((struct task_struct *)p_task, pid);
+#else    
     event->m_ParentProcessId = (uint32_t)derefPtr(p_task, config->offsets.pid);
+#endif
 
     // get the session
     if (config->offsets.auid[0] != -1) {
+#ifdef EBPF_CO_RE
+        event->m_AuditUserId = (ULONG) BPF_CORE_READ((struct task_struct *)task, loginuid.val);
+        event->m_SessionId = BPF_CORE_READ((struct task_struct *)task, sessionid);;
+#else
         event->m_AuditUserId = (uint32_t)derefPtr(task, config->offsets.auid);
         event->m_SessionId = (uint32_t)derefPtr(task, config->offsets.ses);
+#endif
     } else {
         event->m_AuditUserId = -1;
         event->m_SessionId = -1;
@@ -138,8 +150,13 @@ static inline char* set_ProcCreate_info(
     // get the creds
     cred = (const void *)derefPtr(task, config->offsets.cred);
     if (cred) {
+#ifdef EBPF_CO_RE
+        event->m_AuthenticationId.LowPart = (DWORD) BPF_CORE_READ((struct task_struct *)task, cred, uid.val);
+        event->m_AuthenticationId.HighPart = (DWORD) BPF_CORE_READ((struct task_struct *)task, signal, tty, index);
+#else
         event->m_AuthenticationId.LowPart = (uint32_t)derefPtr(cred, config->offsets.cred_uid);
         event->m_AuthenticationId.HighPart = (uint32_t)derefPtr(task, config->offsets.tty);
+#endif
     } else {
         BPF_PRINTK("ERROR, failed to deref creds\n");
         event->m_AuthenticationId.LowPart = -1;
@@ -149,10 +166,20 @@ static inline char* set_ProcCreate_info(
     // get the process key - this is the end of the text segment currently as it should be
     // a) randomised for a PIE executable; and
     // b) dependent on the amount of code in the process
+#ifdef EBPF_CO_RE
+    event->m_ProcessKey = BPF_CORE_READ((struct task_struct *)task, mm, end_code);
+#else
     event->m_ProcessKey = (uint64_t)derefPtr(task, config->offsets.mm_end_code);
+#endif
 
     // get process start time - this is in nanoseconds and we want 100ns intervals
-    event->m_CreateTime.QuadPart = (derefPtr(task, config->offsets.start_time) + config->bootNsSinceEpoch) / 100;
+#ifdef EBPF_CO_RE
+    event->m_CreateTime.QuadPart = BPF_CORE_READ((struct task_struct *)task, start_time);
+#else
+    event->m_CreateTime.QuadPart = (derefPtr(task, config->offsets.start_time)); 
+#endif    
+    event->m_CreateTime.QuadPart = (event->m_CreateTime.QuadPart + config->bootNsSinceEpoch) / 100;
+
     return set_process_ext(event, config, task);
 }
 

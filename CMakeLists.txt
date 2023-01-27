@@ -62,8 +62,8 @@ configure_file(package/SPECS.in/spec.in SPECS.spec)
 #
 # enable Debug while pre-release; re-enable it post-release to add symbols to binary
 #
-#set(CMAKE_BUILD_TYPE Debug)
-#option(DEBUG_K "Enter debug mode" On)
+set(CMAKE_BUILD_TYPE Debug)
+option(DEBUG_K "Enter debug mode" On)
 
 #
 # external programs used by this build
@@ -491,7 +491,7 @@ set(CLANG_DEFINES -D __KERNEL__
                   -D __BPF_TRACING__
                   -D __TARGET_ARCH_x86
                   -D __linux__
-                  -D SYSMON_EBPF_CO_RE
+                  -D EBPF_CO_RE
                   )
 if (DEBUG_K)
     message("Using DEBUG_K Option...")

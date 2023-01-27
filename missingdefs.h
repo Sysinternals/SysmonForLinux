@@ -35,7 +35,7 @@
 #pragma once
 
 // If we're not compiling eBPF programs, the below will not be defined. 
-#ifndef SYSMON_EBPF_CO_RE
+#ifndef EBPF_CO_RE
 enum {
     TCP_ESTABLISHED = 1,
     TCP_SYN_SENT = 2,
