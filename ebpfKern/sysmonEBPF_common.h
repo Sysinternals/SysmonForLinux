@@ -50,7 +50,7 @@
 #include <sysinternalsEBPF_common.h>
 #include <stdint.h>
 #include <bpf_helpers.h>
-#include <bpf/bpf_core_read.h>
+#include <bpf_core_read.h>
 #include <asm/unistd_64.h>
 #include <sysinternalsEBPFshared.h>
 #include "sysmon_defs.h"
