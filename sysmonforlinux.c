@@ -169,147 +169,6 @@ const ebpfTelemetryMapObject    mapObjects[] =
 // this holds the FDs for the above maps
 int mapFds[sizeof(mapObjects) / sizeof(*mapObjects)];
 
-ebpfTelemetryObject   kernelObjs[] =
-{
-    {
-        KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
-        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-        TPenterProgs,
-        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-        TPexitProgs,
-        0, NULL, 0, NULL, // No raw tracepoint programs
-        NULL,
-        sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
-        otherTPprogs4_15
-    },
-    {
-        KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
-        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-        TPenterProgs,
-        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-        TPexitProgs,
-        0, NULL, 0, NULL, // No raw tracepoint programs
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
-        otherTPprogs4_16
-    },
-    {
-        KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_6__CORE_OBJ, {5, 6}, {0, 0}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    }
-};
-
-ebpfTelemetryObject   kernelObjs_core[] =
-{
-    {
-        KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
-        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-        TPenterProgs,
-        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-        TPexitProgs,
-        0, NULL, 0, NULL, // No raw tracepoint programs
-        NULL,
-        sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
-        otherTPprogs4_15
-    },
-    {
-        KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
-        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-        TPenterProgs,
-        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-        TPexitProgs,
-        0, NULL, 0, NULL, // No raw tracepoint programs
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
-        otherTPprogs4_16
-    },
-    {
-        KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    },
-    {
-        KERN_5_6__CORE_OBJ, {5, 6}, {0, 0}, true,
-        0, NULL, 0, NULL, // No traditional tracepoint programs
-        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-        RTPenterProgs,
-        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-        RTPexitProgs,
-        NULL,
-        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-        otherTPprogs4_16
-    }
-};
-
-
 //--------------------------------------------------------------------
 //
 // syslogHelper
@@ -1466,29 +1325,156 @@ main(
             debug = true;
         }
 
-        if(!fopen(BTF_KERNEL_FILE, "r"))
+        struct stat st;
+        bool btfEnabled = stat(BTF_KERNEL_FILE, &st) < 0 ? false : true;
+
+        const ebpfTelemetryObject   kernelObjs[] =
         {
-            // System is not BTF enabled, use the non BTF/CORE ebpf programs
-            for(int i=0; i<KERN_NUM_PROGRAMS; i++)
             {
-                kernelObjs[i].activeSyscalls = activeSyscalls;
+                KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
+                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+                TPenterProgs,
+                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+                TPexitProgs,
+                0, NULL, 0, NULL, // No raw tracepoint programs
+                activeSyscalls,
+                sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
+                otherTPprogs4_15
+            },
+            {
+                KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
+                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+                TPenterProgs,
+                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+                TPexitProgs,
+                0, NULL, 0, NULL, // No raw tracepoint programs
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
+                otherTPprogs4_16
+            },
+            {
+                KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_6__OBJ, {5, 6}, {0, 0}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
             }
-        }
-        else
+        };
+
+        ebpfTelemetryObject   kernelObjs_core[] =
         {
-            // System is BTF enabled, use the BTF/CORE ebpf programs
-            for(int i=0; i<KERN_NUM_PROGRAMS; i++)
             {
-                kernelObjs_core[i].activeSyscalls = activeSyscalls;
+                KERN_4_15_CORE_OBJ, {4, 15}, {4, 16}, false,
+                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+                TPenterProgs,
+                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+                TPexitProgs,
+                0, NULL, 0, NULL, // No raw tracepoint programs
+                activeSyscalls,
+                sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
+                otherTPprogs4_15
+            },
+            {
+                KERN_4_16_CORE_OBJ, {4, 16}, {4, 17}, false,
+                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+                TPenterProgs,
+                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+                TPexitProgs,
+                0, NULL, 0, NULL, // No raw tracepoint programs
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
+                otherTPprogs4_16
+            },
+            {
+                KERN_4_17_5_1_CORE_OBJ, {4, 17}, {5, 2}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_2_CORE_OBJ, {5, 2}, {5, 3}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_3_5_5_CORE_OBJ, {5, 3}, {5, 6}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
+            },
+            {
+                KERN_5_6__CORE_OBJ, {5, 6}, {0, 0}, true,
+                0, NULL, 0, NULL, // No traditional tracepoint programs
+                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+                RTPenterProgs,
+                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+                RTPexitProgs,
+                activeSyscalls,
+                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+                otherTPprogs4_16
             }
-        }
+        };
+
 
         const ebpfTelemetryConfig sysmonConfig = (ebpfTelemetryConfig)
         {
             g_bootSecSinceEpoch,
             true, // enable raw socket capture
-            sizeof(kernelObjs) / sizeof(*kernelObjs),
-            kernelObjs,
+            btfEnabled ? sizeof(kernelObjs_core) / sizeof(*kernelObjs_core) : sizeof(kernelObjs) / sizeof(*kernelObjs),
+            btfEnabled ? kernelObjs_core : kernelObjs,
             sizeof(defPaths) / sizeof(*defPaths),
             defPaths,
             sizeof(mapObjects) / sizeof(*mapObjects),
