@@ -55,6 +55,8 @@
 
 #define EVENT_BUFFER_SIZE (49 * 1024)
 
+#define BTF_KERNEL_FILE "/sys/kernel/btf/vmlinux"
+
 #define STARTUP_SEM_NAME "/sysmon-startup"
 
 unsigned long           totalEvents = 0;
@@ -73,6 +75,7 @@ double                  g_bootSecSinceEpoch = 0;
 BOOLEAN                 g_DebugMode = FALSE;
 BOOLEAN                 g_DebugModeVerbose = FALSE;
 CRITICAL_SECTION        g_DebugModePrintCriticalSection;
+char*                   btfPath;
 
 typedef TCHAR _bstr_t;
 
@@ -165,6 +168,146 @@ const ebpfTelemetryMapObject    mapObjects[] =
 
 // this holds the FDs for the above maps
 int mapFds[sizeof(mapObjects) / sizeof(*mapObjects)];
+
+ebpfTelemetryObject   kernelObjs[] =
+{
+    {
+        KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
+        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+        TPenterProgs,
+        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+        TPexitProgs,
+        0, NULL, 0, NULL, // No raw tracepoint programs
+        NULL,
+        sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
+        otherTPprogs4_15
+    },
+    {
+        KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
+        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+        TPenterProgs,
+        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+        TPexitProgs,
+        0, NULL, 0, NULL, // No raw tracepoint programs
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
+        otherTPprogs4_16
+    },
+    {
+        KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_6__CORE_OBJ, {5, 6}, {0, 0}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    }
+};
+
+ebpfTelemetryObject   kernelObjs_core[] =
+{
+    {
+        KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
+        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+        TPenterProgs,
+        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+        TPexitProgs,
+        0, NULL, 0, NULL, // No raw tracepoint programs
+        NULL,
+        sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
+        otherTPprogs4_15
+    },
+    {
+        KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
+        sizeof(TPenterProgs) / sizeof(*TPenterProgs),
+        TPenterProgs,
+        sizeof(TPexitProgs) / sizeof(*TPexitProgs),
+        TPexitProgs,
+        0, NULL, 0, NULL, // No raw tracepoint programs
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
+        otherTPprogs4_16
+    },
+    {
+        KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    },
+    {
+        KERN_5_6__CORE_OBJ, {5, 6}, {0, 0}, true,
+        0, NULL, 0, NULL, // No traditional tracepoint programs
+        sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
+        RTPenterProgs,
+        sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
+        RTPexitProgs,
+        NULL,
+        sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
+        otherTPprogs4_16
+    }
+};
 
 
 //--------------------------------------------------------------------
@@ -921,7 +1064,7 @@ bool setConfigFromStoredArgv(
     //
     // Parse the command line using the data from manifest.xml
     //
-    if( !ParseCommandLine( argc, argv, &rules, &rulesSize, 
+    if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
             &parsedConfigFile, configHash, _countof( configHash ) ) ) {
         fprintf( stderr, "Could not parse new rules\n" );
         free( argv );
@@ -1100,12 +1243,12 @@ main(
 	//
 	// Parse the command line using the data from manifest.xml
 	//
-	if( !ParseCommandLine( argc, argv, &rules, &rulesSize, 
+	if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
 					&configFile, configHash, _countof( configHash) ) ) {
 
 		return Usage( argv[0], &csbi );
 	}
- 
+
     //
     // Initialize and load any user-specified max field sizes
     //
@@ -1129,7 +1272,7 @@ main(
         return ERROR_INVALID_PARAMETER;
     }
 
-    if( OPT_SET(ClipboardInstance) || 
+    if( OPT_SET(ClipboardInstance) ||
         OPT_SET(DriverName) ||
         OPT_SET(ArchiveDirectory) ||
         OPT_SET(CaptureClipboard) ||
@@ -1144,7 +1287,7 @@ main(
         g_DebugMode = TRUE;
         debugModeOption = OPT_VALUE( DebugMode );
         if( debugModeOption ) {
-            
+
             if( _tcsicmp( debugModeOption, _T("verbose") ) ) {
                 _tprintf( _T( "Possible options for DebugMode: verbose\n\n" ) );
                 return ERROR_INVALID_PARAMETER;
@@ -1184,7 +1327,7 @@ main(
 
     if ( OPT_SET(Configuration) ) {
         if( OPT_VALUE(Configuration) == NULL ) {
-            
+
             nothingToChange = !HasCustomConfiguration();
         } else {
 
@@ -1301,7 +1444,7 @@ main(
         // If Sysmon is not currently running as a service (e.g. started by
         // systemd or init.d) then start it as a service by replacing this
         // execution with the shell invoker that starts the service.  If
-        // Sysmon is already running as a service, or it cannot start as a 
+        // Sysmon is already running as a service, or it cannot start as a
         // service (missing systemd and missing init.d) then continue.
         //
         startSysmonService();
@@ -1314,76 +1457,31 @@ main(
         memset( activeSyscalls, 0, sizeof( activeSyscalls ) );
         setConfigFromStoredArgv( &configFile, activeSyscalls );
 
+        if ( OPT_SET(BTF) ) {
+            btfPath = OPT_VALUE( BTF );
+        }
 
-        const ebpfTelemetryObject   kernelObjs[] = 
+        bool debug = false;
+        if( OPT_SET( DebugMode ) ) {
+            debug = true;
+        }
+
+        if(!fopen(BTF_KERNEL_FILE, "r"))
         {
+            // System is not BTF enabled, use the non BTF/CORE ebpf programs
+            for(int i=0; i<KERN_NUM_PROGRAMS; i++)
             {
-                KERN_4_15_OBJ, {4, 15}, {4, 16}, false,
-                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-                TPenterProgs,
-                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-                TPexitProgs,
-                0, NULL, 0, NULL, // No raw tracepoint programs
-                activeSyscalls,
-                sizeof(otherTPprogs4_15) / sizeof(*otherTPprogs4_15),
-                otherTPprogs4_15
-            },
-            {
-                KERN_4_16_OBJ, {4, 16}, {4, 17}, false,
-                sizeof(TPenterProgs) / sizeof(*TPenterProgs),
-                TPenterProgs,
-                sizeof(TPexitProgs) / sizeof(*TPexitProgs),
-                TPexitProgs,
-                0, NULL, 0, NULL, // No raw tracepoint programs
-                activeSyscalls,
-                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_15),
-                otherTPprogs4_16
-            },
-            {
-                KERN_4_17_5_1_OBJ, {4, 17}, {5, 2}, true,
-                0, NULL, 0, NULL, // No traditional tracepoint programs
-                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-                RTPenterProgs,
-                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-                RTPexitProgs,
-                activeSyscalls,
-                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-                otherTPprogs4_16
-            },
-            {
-                KERN_5_2_OBJ, {5, 2}, {5, 3}, true,
-                0, NULL, 0, NULL, // No traditional tracepoint programs
-                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-                RTPenterProgs,
-                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-                RTPexitProgs,
-                activeSyscalls,
-                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-                otherTPprogs4_16
-            },
-            {
-                KERN_5_3_5_5_OBJ, {5, 3}, {5, 6}, true,
-                0, NULL, 0, NULL, // No traditional tracepoint programs
-                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-                RTPenterProgs,
-                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-                RTPexitProgs,
-                activeSyscalls,
-                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-                otherTPprogs4_16
-            },
-            {
-                KERN_5_6__OBJ, {5, 6}, {0, 0}, true,
-                0, NULL, 0, NULL, // No traditional tracepoint programs
-                sizeof(RTPenterProgs) / sizeof(*RTPenterProgs),
-                RTPenterProgs,
-                sizeof(RTPexitProgs) / sizeof(*RTPexitProgs),
-                RTPexitProgs,
-                activeSyscalls,
-                sizeof(otherTPprogs4_16) / sizeof(*otherTPprogs4_16),
-                otherTPprogs4_16
+                kernelObjs[i].activeSyscalls = activeSyscalls;
             }
-        };
+        }
+        else
+        {
+            // System is BTF enabled, use the BTF/CORE ebpf programs
+            for(int i=0; i<KERN_NUM_PROGRAMS; i++)
+            {
+                kernelObjs_core[i].activeSyscalls = activeSyscalls;
+            }
+        }
 
         const ebpfTelemetryConfig sysmonConfig = (ebpfTelemetryConfig)
         {
@@ -1394,7 +1492,9 @@ main(
             sizeof(defPaths) / sizeof(*defPaths),
             defPaths,
             sizeof(mapObjects) / sizeof(*mapObjects),
-            mapObjects
+            mapObjects,
+            btfPath,
+            debug
         };
 
         //

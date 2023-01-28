@@ -134,6 +134,12 @@ add_executable(sysmon
                sysmonEBPFkern5.2.o.o
                sysmonEBPFkern5.3-5.5.o.o
                sysmonEBPFkern5.6-.o.o
+               sysmonEBPFkern4.15_core.o.o
+               sysmonEBPFkern4.16_core.o.o
+               sysmonEBPFkern4.17-5.1_core.o.o
+               sysmonEBPFkern5.2_core.o.o
+               sysmonEBPFkern5.3-5.5_core.o.o
+               sysmonEBPFkern5.6-_core.o.o
                sysmonLogView.o
                sysmon.d.o
                sysmon.service.o
@@ -143,6 +149,12 @@ add_executable(sysmon
                sysmonEBPFkern5.2.rep
                sysmonEBPFkern5.3-5.5.rep
                sysmonEBPFkern5.6-.rep
+               sysmonEBPFkern4.15_core.rep
+               sysmonEBPFkern4.16_core.rep
+               sysmonEBPFkern4.17-5.1_core.rep
+               sysmonEBPFkern5.2_core.rep
+               sysmonEBPFkern5.3-5.5_core.rep
+               sysmonEBPFkern5.6-_core.rep
                )
 
 target_include_directories(sysmon PUBLIC
@@ -207,6 +219,41 @@ add_custom_command(OUTPUT sysmonEBPFkern5.6-.rep
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.6-.o
                   )
 
+add_custom_command(OUTPUT sysmonEBPFkern4.15_core.rep
+                   COMMAND touch sysmonEBPFkern4.15_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.15_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.15_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern4.16_core.rep
+                   COMMAND touch sysmonEBPFkern4.16_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.16_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.16_core.o
+                 )
+
+add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1_core.rep
+                   COMMAND touch sysmonEBPFkern4.17-5.1_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.17-5.1_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.17-5.1_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.2_core.rep
+                   COMMAND touch sysmonEBPFkern5.2_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.2_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.2_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.3-5.5_core.rep
+                   COMMAND touch sysmonEBPFkern5.3-5.5_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.3-5.5_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.3-5.5_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.6-_core.rep
+                   COMMAND touch sysmonEBPFkern5.6-_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.6-_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.6-_core.o
+                  )
 
 # list of files the EBPF programs depend upon
 set(EBPF_DEPENDS
@@ -423,7 +470,7 @@ add_custom_command(OUTPUT sysmonmsgop.c
                    DEPENDS sysmonmsgop.man
                    )
 
-# 
+#
 # convert embedded files to objects for linking with the sysmon binary
 #
 add_custom_command(OUTPUT manifest.xml.o
@@ -439,6 +486,12 @@ set(PACKED_BINARY_FILES
     sysmonEBPFkern5.2.o
     sysmonEBPFkern5.3-5.5.o
     sysmonEBPFkern5.6-.o
+    sysmonEBPFkern4.15_core.o
+    sysmonEBPFkern4.16_core.o
+    sysmonEBPFkern4.17-5.1_core.o
+    sysmonEBPFkern5.2_core.o
+    sysmonEBPFkern5.3-5.5_core.o
+    sysmonEBPFkern5.6-_core.o
     sysmonLogView
     sysmon.service
     sysmon.d
@@ -491,7 +544,6 @@ set(CLANG_DEFINES -D __KERNEL__
                   -D __BPF_TRACING__
                   -D __TARGET_ARCH_x86
                   -D __linux__
-                  -D EBPF_CO_RE
                   )
 if (DEBUG_K)
     message("Using DEBUG_K Option...")
@@ -509,6 +561,8 @@ set(CLANG_INCLUDES
                    -I "${libbpf_SOURCE_DIR}/src"
                    )
 
+set(EBPF_PROG_SUFFIX "")
+
 #
 # EBPF
 #
@@ -517,14 +571,14 @@ set(CLANG_INCLUDES
 
 # function to make ebpf programs
 function(build_ebpf ebpfsrc)
-    add_custom_command(OUTPUT ${ebpfsrc}.o
-                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -target bpf -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o "${ebpfsrc}.o"
-                       COMMENT "Building EBPF object ${ebpfsrc}.o"
+    add_custom_command(OUTPUT ${ebpfsrc}${EBPF_PROG_SUFFIX}.o
+                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -target bpf -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o "${ebpfsrc}${EBPF_PROG_SUFFIX}.o"
+                       COMMENT "Building EBPF object ${ebpfsrc}${EBPF_PROG_SUFFIX}.o"
                        DEPENDS ebpfKern/${ebpfsrc}.c ${EBPF_DEPENDS}
                        )
 endfunction()
 
-# loop for all ebpf programs
+# First we build the EBPF programs for non CORE, loop for all ebpf programs (non CORE)
 foreach(EBPF_PROG IN LISTS EBPF_PROGS)
 
     # add custom target to build all ebpf programs with 'all'
@@ -541,3 +595,18 @@ foreach(EBPF_PROG IN LISTS EBPF_PROGS)
     set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
 endforeach(EBPF_PROG)
 
+
+list(APPEND CLANG_DEFINES -DEBPF_CO_RE)
+set(EBPF_PROG_SUFFIX "_core")
+
+# Next we build the EBPF programs for CORE, loop for all ebpf programs (CORE)
+foreach(EBPF_PROG IN LISTS EBPF_PROGS)
+
+    # test to only build ebpf programs when they have changed
+    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_PROG_SUFFIX}.o)
+        build_ebpf(${EBPF_PROG})
+    endif()
+
+    # add ebpf programs to clean
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}${EBPF_PROG_SUFFIX}.o)
+endforeach(EBPF_PROG)
