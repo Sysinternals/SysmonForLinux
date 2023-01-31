@@ -1,4 +1,6 @@
 # Build
+
+## Prerequisites
 Sysmon For Linux build instructions depend on:
 
 - SysinternalsEBPF being installed:
@@ -11,10 +13,14 @@ _packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.md)).
 
 - .NET (latest) SDK. Please see [.NET Installation](https://learn.microsoft.com/en-us/dotnet/core/install/linux)
 
-
-## Prerequisites
+- clang/llvm v10+
 
 ### Ubuntu 22.04
+```
+sudo apt update
+dotnet tool install --global dotnet-t4 --version 2.3.1
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libgmock-dev libjson-glib-dev
+```
 
 
 ### Ubuntu 20.04
@@ -42,28 +48,47 @@ under `/usr/local`:
 - `/usr/local/lib/libgtest*.a`
 - `/usr/local/lib/libgmock*.a`
 
-### RHEL 9
+### Rocky 9
 ```
-Make sure crb and epel is enabled (dnf install dnf-plugins-core && dnf config-manager --set-enabled crb && dnf install epel-release)
+dnf install dnf-plugins-core
+dnf config-manager --set-enabled crb
+dnf install epel-release
 
+dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
 ```
 
-### RHEL 8
+### Rocky 8
 ```
-Make sure powertools and epel is enabled.
+dnf install dnf-plugins-core
+dnf install epel-release
+dnf config-manager --set-enabled powertools
 
+dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
 ```
 
 ### Debian 11
+```
+wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev
+```
 
-
+### Debian 10
+```
+wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+sudo apt update
+dotnet tool install --global dotnet-t4 --version 2.3.1
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev
+```
 
 ## Build
 ```
