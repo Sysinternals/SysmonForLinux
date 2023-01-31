@@ -68,7 +68,7 @@ option(DEBUG_K "Enter debug mode" On)
 #
 # external programs used by this build
 #
-set(TEXTTRANSFORM "/usr/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe")
+set(TEXTTRANSFORM "t4")
 set(ICONV "/usr/bin/iconv")
 set(LD "/usr/bin/ld")
 
@@ -417,25 +417,25 @@ add_custom_command(OUTPUT yoursleep
 # automatically generate sources from manifest.xml and manifest.tt
 #
 add_custom_command(OUTPUT sysmonevents.h.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonevents.h.utf16 -a '!!type!header'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonevents.h.utf16 -a '!!type!header'
                    COMMENT "Extracting sysmonevents.h.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonevents.h
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonevents.h.utf16 -o sysmonevents.h
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonevents.h.utf16 -o sysmonevents.h
                    COMMENT "Converting sysmonevents.h.utf16 to UTF8"
                    DEPENDS sysmonevents.h.utf16
                    )
 
 add_custom_command(OUTPUT sysmonmsg.mc.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsg.mc.utf16 -a '!!version!internal' -a '!!type!mc'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsg.mc.utf16 -a '!!version!internal' -a '!!type!mc'
                    COMMENT "Extracting sysmonmsg.mc.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonmsg.mc
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonmsg.mc.utf16 -o sysmonmsg.mc
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonmsg.mc.utf16 -o sysmonmsg.mc
                    COMMENT "Converting sysmonmsg.mc.utf16 to UTF8"
                    DEPENDS sysmonmsg.mc.utf16
                    )
@@ -447,13 +447,13 @@ add_custom_command(OUTPUT sysmonmsg.h
                    )
 
 add_custom_command(OUTPUT sysmonmsgop.man.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsgop.man.utf16 -a '!!version!internal' -a '!!type!man'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsgop.man.utf16 -a '!!version!internal' -a '!!type!man'
                    COMMENT "Extracting sysmonmsgop.man.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonmsgop.man
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonmsgop.man.utf16 -o sysmonmsgop.man
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonmsgop.man.utf16 -o sysmonmsgop.man
                    COMMENT "Converting sysmonmsgop.man.utf16 to UTF8"
                    DEPENDS sysmonmsgop.man.utf16
                    )
