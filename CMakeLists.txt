@@ -184,73 +184,73 @@ set(EBPF_PROGS
 )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.15.rep
-                   COMMAND touch sysmonEBPFkern4.15.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.15.o 4096 && touch sysmonEBPFkern4.15.rep
                    COMMENT "Checking sysmonEBPFkern4.15.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.15.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.16.rep
-                   COMMAND touch sysmonEBPFkern4.16.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.16.o 4096 && touch sysmonEBPFkern4.16.rep
                    COMMENT "Checking sysmonEBPFkern4.16.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.16.o
                  )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1.rep
-                   COMMAND touch sysmonEBPFkern4.17-5.1.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.17-5.1.o 4096 && touch sysmonEBPFkern4.17-5.1.rep
                    COMMENT "Checking sysmonEBPFkern4.17-5.1.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.17-5.1.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.2.rep
-                   COMMAND touch sysmonEBPFkern5.2.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.2.o 32768 && touch sysmonEBPFkern5.2.rep
                    COMMENT "Checking sysmonEBPFkern5.2.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.2.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.3-5.5.rep
-                   COMMAND touch sysmonEBPFkern5.3-5.5.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.3-5.5.o 32768 && touch sysmonEBPFkern5.3-5.5.rep
                    COMMENT "Checking sysmonEBPFkern5.3-5.5.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.3-5.5.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.6-.rep
-                   COMMAND touch sysmonEBPFkern5.6-.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.6-.o 32768 && touch sysmonEBPFkern5.6-.rep
                    COMMENT "Checking sysmonEBPFkern5.6-.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.6-.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.15_core.rep
-                   COMMAND touch sysmonEBPFkern4.15_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.15_core.o 4096 touch sysmonEBPFkern4.15_core.rep
                    COMMENT "Checking sysmonEBPFkern4.15_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.15_core.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.16_core.rep
-                   COMMAND touch sysmonEBPFkern4.16_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.16_core.o 4096 && touch sysmonEBPFkern4.16_core.rep
                    COMMENT "Checking sysmonEBPFkern4.16_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.16_core.o
                  )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1_core.rep
-                   COMMAND touch sysmonEBPFkern4.17-5.1_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.17-5.1_core.o 4096 && touch sysmonEBPFkern4.17-5.1_core.rep
                    COMMENT "Checking sysmonEBPFkern4.17-5.1_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.17-5.1_core.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.2_core.rep
-                   COMMAND touch sysmonEBPFkern5.2_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.2_core.o 32768 && touch sysmonEBPFkern5.2_core.rep
                    COMMENT "Checking sysmonEBPFkern5.2_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.2_core.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.3-5.5_core.rep
-                   COMMAND touch sysmonEBPFkern5.3-5.5_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.3-5.5_core.o 32768 && touch sysmonEBPFkern5.3-5.5_core.rep
                    COMMENT "Checking sysmonEBPFkern5.3-5.5_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.3-5.5_core.o
                   )
 
 add_custom_command(OUTPUT sysmonEBPFkern5.6-_core.rep
-                   COMMAND touch sysmonEBPFkern5.6-_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.6-_core.o 32768 && touch sysmonEBPFkern5.6-_core.rep
                    COMMENT "Checking sysmonEBPFkern5.6-_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.6-_core.o
                   )
@@ -350,8 +350,7 @@ target_include_directories(checkEBPFsizes PUBLIC
                            "/usr/include"
                            )
 
-target_link_libraries(checkEBPFsizes elf)
-
+target_link_libraries(checkEBPFsizes sysinternalsEBPF)
 
 #
 # GTest required for unit tests
