@@ -96,26 +96,26 @@ const char                      *defPaths[] =
     {"./", "./sysmonEBPF", "/opt/sysmon/", "/opt/sysmon/sysmonEBPF"};
 
 const ebpfSyscallTPprog         TPenterProgs[] =
-{   {EBPF_GENERIC_SYSCALL, "sysmon/generic/enterN"}
+{   {EBPF_GENERIC_SYSCALL, "genericEnterN"}
 };
 
 const ebpfSyscallTPprog         TPexitProgs[] =
-{   {__NR_execve, "sysmon/ProcCreate/exit"},
-    {__NR_execveat, "sysmon/ProcCreate/exit"},
-    {__NR_creat, "sysmon/FileCreate/exit"},
-    {__NR_open, "sysmon/FileOpen/exit"},
-    {__NR_openat, "sysmon/FileOpen/exit"},
-    {__NR_unlink, "sysmon/FileDelete/exit"},
-    {__NR_unlinkat, "sysmon/FileDeleteAt/exit"},
-    {__NR_unlinkat, "sysmon/FileDeleteAtCwd/exit"},
-    {__NR_accept, "sysmon/TCPaccept/exit"},
-    {__NR_accept4, "sysmon/TCPaccept/exit"},
-    {__NR_ptrace, "sysmon/ProcAccessed/exit"},
-    {__NR_recvfrom, "sysmon/UDPrecv/exit"},
-    {__NR_recvmsg, "sysmon/UDPrecv/exit"},
-    {__NR_recvmmsg, "sysmon/UDPrecv/exit"},
-    {__NR_read, "sysmon/UDPrecv/exit"},
-    {__NR_close, "sysmon/CloseFD/exit"}
+{   {__NR_execve, "ProcCreateExit"},
+    {__NR_execveat, "ProcCreateExit"},
+    {__NR_creat, "FileCreateExit"},
+    {__NR_open, "FileOpenExit"},
+    {__NR_openat, "FileOpenExit"},
+    {__NR_unlink, "FileDeleteExit"},
+    {__NR_unlinkat, "FileDeleteAtExit"},
+    {__NR_unlinkat, "FileDeleteAtCwdExit"},
+    {__NR_accept, "TCPacceptExit"},
+    {__NR_accept4, "TCPacceptExit"},
+    {__NR_ptrace, "ProcAccessedExit"},
+    {__NR_recvfrom, "UDPrecvExit"},
+    {__NR_recvmsg, "UDPrecvExit"},
+    {__NR_recvmmsg, "UDPrecvExit"},
+    {__NR_read, "UDPrecvExit"},
+    {__NR_close, "CloseFDExit"}
 };
 
 const ebpfSyscallRTPprog        RTPenterProgs[] =
@@ -149,7 +149,7 @@ const ebpfSyscallRTPprog        RTPexitProgs[] =
 const ebpfTracepointProg        otherTPprogs4_15[] =
 {
     {"sched", "sched_process_exit", "ProcTerminated", __NR_PROCTERM},
-    {"tcp", "tcp_set_state", "tracepoint/tcp/tcp_set_state", __NR_NETWORK},
+    {"tcp", "tcp_set_state", "TCPconnectionOld", __NR_NETWORK},
     {"skb", "consume_skb", "UDPsend", __NR_NETWORK}
 };
 
