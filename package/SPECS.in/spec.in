@@ -23,9 +23,3 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sysmon
 /usr/share/man/man8/sysmon.8.gz
 
-%preun
-sysmon -accepteula -u
-
-%postun
-if [ -d /opt/sysmon ]; then rm -rf /opt/sysmon; fi
-
