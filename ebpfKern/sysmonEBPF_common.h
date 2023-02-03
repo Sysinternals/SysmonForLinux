@@ -66,13 +66,6 @@
 
 // create a map to hold the event as we build it - too big for stack
 // one entry per cpu
-/*struct bpf_map_def SEC("maps") eventStorageMap = {
-    .type = BPF_MAP_TYPE_ARRAY,
-    .key_size = sizeof(uint32_t),
-    .value_size = LINUX_MAX_EVENT_SIZE,
-    .max_entries = MAX_PROC,
-};*/
-
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __uint(key_size, sizeof(uint32_t));
@@ -82,13 +75,6 @@ struct {
 
 // create a map to hold the args as we build it - too big for stack
 // one entry per cpu
-/*struct bpf_map_def SEC("maps") argsStorageMap = {
-    .type = BPF_MAP_TYPE_ARRAY,
-    .key_size = sizeof(uint32_t),
-    .value_size = sizeof(argsStruct),
-    .max_entries = MAX_PROC,
-};*/
-
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __type(key, uint32_t);
@@ -100,13 +86,6 @@ struct {
 // create a map to hold the packet as we access it - eBPF doesn't like
 // arbitrary access to stack buffers
 // one entry per cpu
-/*struct bpf_map_def SEC("maps") packetStorageMap = {
-    .type = BPF_MAP_TYPE_ARRAY,
-    .key_size = sizeof(uint32_t),
-    .value_size = PACKET_SIZE,
-    .max_entries = MAX_PROC,
-};*/
-
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __uint(key_size, sizeof(uint32_t));
@@ -115,13 +94,6 @@ struct {
 } packetStorageMap SEC(".maps");
 
 // create a map to hold the UDP recv age information
-/*struct bpf_map_def SEC("maps") UDPrecvAge = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(uint64_t),
-    .value_size = sizeof(uint64_t),
-    .max_entries = UDP_HASH_SIZE,
-};*/
-
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __uint(max_entries, UDP_HASH_SIZE);
@@ -131,13 +103,6 @@ struct {
 
 
 // create a map to hold the UDP send age information
-/*struct bpf_map_def SEC("maps") UDPsendAge = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(uint64_t),
-    .value_size = sizeof(uint64_t),
-    .max_entries = UDP_HASH_SIZE,
-};*/
-
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __uint(max_entries, UDP_HASH_SIZE);

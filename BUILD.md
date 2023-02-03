@@ -1,8 +1,6 @@
 # Build
 
 ## Prerequisites
-Sysmon For Linux build instructions depend on:
-
 - SysinternalsEBPF being installed:
 library `libsysinternalsEBPF.so`, header `libsysinternalsEBPF.h`, plus
 resource files in `/opt/sysinternalsEBPF`. These can be installed from

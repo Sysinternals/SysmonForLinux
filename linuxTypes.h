@@ -27,9 +27,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
-//#include <sys/types.h>
-//#include <unistd.h>
-//#include <stddef.h>
 #include <linux/limits.h>
 #include <ctype.h>
 
@@ -99,19 +96,19 @@ typedef HANDLE HKEY;
 // Windows compiler annotaions
 //
 #define ANYSIZE_ARRAY 1
-#define __stdcall 
-#define WINAPI 
+#define __stdcall
+#define WINAPI
 
-#define _In_ 
-#define _Inout_ 
-#define _Out_ 
-#define _Outptr_ 
-#define _In_opt_ 
-#define _Inout_opt_ 
-#define _Out_opt_ 
-#define _Outptr_opt_ 
-#define _In_reads_(s) 
-#define _In_reads_opt_(s) 
+#define _In_
+#define _Inout_
+#define _Out_
+#define _Outptr_
+#define _In_opt_
+#define _Inout_opt_
+#define _Out_opt_
+#define _Outptr_opt_
+#define _In_reads_(s)
+#define _In_reads_opt_(s)
 
 #define MAX_PATH PATH_MAX
 
@@ -462,7 +459,7 @@ typedef void (*PENABLECALLBACK)(
     PVOID CallbackContext
 );
 
-typedef struct _RTL_BUFFER 
+typedef struct _RTL_BUFFER
 {
     PUCHAR Buffer;
     PUCHAR StaticBuffer;
@@ -479,9 +476,9 @@ typedef struct _UNICODE_STRING {
 } UNICODE_STRING, *PUNICODE_STRING;
 
 typedef struct _RTL_UNICODE_STRING_BUFFER
-{  
-    UNICODE_STRING String; 
-    RTL_BUFFER ByteBuffer; 
+{
+    UNICODE_STRING String;
+    RTL_BUFFER ByteBuffer;
     UCHAR MinimumStaticBufferForTerminalNul[sizeof(WCHAR)];
 } RTL_UNICODE_STRING_BUFFER, *PRTL_UNICODE_STRING_BUFFER;
 

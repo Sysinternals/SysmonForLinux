@@ -62,13 +62,13 @@ configure_file(package/SPECS.in/spec.in SPECS.spec)
 #
 # enable Debug while pre-release; re-enable it post-release to add symbols to binary
 #
-set(CMAKE_BUILD_TYPE Debug)
-option(DEBUG_K "Enter debug mode" On)
+#set(CMAKE_BUILD_TYPE Debug)
+#option(DEBUG_K "Enter debug mode" On)
 
 #
 # external programs used by this build
 #
-set(TEXTTRANSFORM "t4")
+find_program(TEXTTRANSFORM "t4")
 set(ICONV "/usr/bin/iconv")
 set(LD "/usr/bin/ld")
 
@@ -79,6 +79,7 @@ set(PACKAGE_NAME "sysmonforlinux")
 
 #
 # report warnings as errors
+# -g is required for BTF and CO:RE
 #
 add_compile_options(-Wall -Werror -g)
 
@@ -165,7 +166,7 @@ target_include_directories(sysmon PUBLIC
                            "/usr/local/include"
                            "${LIBXML2_INCLUDE_DIR}"
                            "/opt/sysinternalsEBPF/ebpfKern"
-                           )
+                          )
 
 
 add_custom_target(packages
@@ -229,7 +230,7 @@ add_custom_command(OUTPUT sysmonEBPFkern4.16_core.rep
                    COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.16_core.o 4096 && touch sysmonEBPFkern4.16_core.rep
                    COMMENT "Checking sysmonEBPFkern4.16_core.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.16_core.o
-                 )
+                  )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1_core.rep
                    COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.17-5.1_core.o 4096 && touch sysmonEBPFkern4.17-5.1_core.rep
@@ -560,7 +561,7 @@ set(CLANG_INCLUDES
                    -I "${libbpf_SOURCE_DIR}/src"
                    )
 
-set(EBPF_PROG_SUFFIX "")
+set(EBPF_CORE_PROG_SUFFIX "_core")
 
 #
 # EBPF
@@ -569,43 +570,35 @@ set(EBPF_PROG_SUFFIX "")
 #
 
 # function to make ebpf programs
-function(build_ebpf ebpfsrc)
-    add_custom_command(OUTPUT ${ebpfsrc}${EBPF_PROG_SUFFIX}.o
-                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -target bpf -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o "${ebpfsrc}${EBPF_PROG_SUFFIX}.o"
-                       COMMENT "Building EBPF object ${ebpfsrc}${EBPF_PROG_SUFFIX}.o"
+function(build_ebpf ebpfsrc suffix)
+    add_custom_command(OUTPUT ${ebpfsrc}${suffix}.o
+                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -target bpf -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o "${ebpfsrc}${suffix}.o"
+                       COMMENT "Building EBPF object ${ebpfsrc}${suffix}.o"
                        DEPENDS ebpfKern/${ebpfsrc}.c ${EBPF_DEPENDS}
                        )
 endfunction()
 
-# First we build the EBPF programs for non CORE, loop for all ebpf programs (non CORE)
+# Loop for all ebpf programs
 foreach(EBPF_PROG IN LISTS EBPF_PROGS)
 
     # add custom target to build all ebpf programs with 'all'
     add_custom_target(${EBPF_PROG} ALL
                       DEPENDS "${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c"
-                      )
+                     )
 
     # test to only build ebpf programs when they have changed
     if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}.o)
-        build_ebpf(${EBPF_PROG})
+        # first build NON CORE program
+        list(REMOVE_ITEM CLANG_DEFINES -DEBPF_CO_RE)
+        build_ebpf(${EBPF_PROG} "")
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
     endif()
 
-    # add ebpf programs to clean
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
-endforeach(EBPF_PROG)
-
-
-list(APPEND CLANG_DEFINES -DEBPF_CO_RE)
-set(EBPF_PROG_SUFFIX "_core")
-
-# Next we build the EBPF programs for CORE, loop for all ebpf programs (CORE)
-foreach(EBPF_PROG IN LISTS EBPF_PROGS)
-
-    # test to only build ebpf programs when they have changed
-    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_PROG_SUFFIX}.o)
-        build_ebpf(${EBPF_PROG})
+    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o)
+        # next build CORE program
+        list(APPEND CLANG_DEFINES -DEBPF_CO_RE)
+        build_ebpf(${EBPF_PROG} ${EBPF_CORE_PROG_SUFFIX})
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o)
     endif()
 
-    # add ebpf programs to clean
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}${EBPF_PROG_SUFFIX}.o)
 endforeach(EBPF_PROG)

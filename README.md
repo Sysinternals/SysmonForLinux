@@ -4,6 +4,8 @@
 Sysmon for Linux is a tool that monitors and logs system activity including process lifetime, network connections, file system writes, and more. Sysmon works across reboots and uses advanced filtering to help identify malicious activity as well as how intruders and malware operate on your network.
 Sysmon for Linux is part of [Sysinternals](https://sysinternals.com).
 
+![Sysmon in use](sysmon.gif "Sysmon in use")
+
 ## Installation
 The packages are available in the official Microsoft Linux repositories and instructions on how to install the packages for the different Linux distributions can be found in the [Installation instructions](INSTALL.md).
 
@@ -15,7 +17,7 @@ Please see build instructions [here](BUILD.md).
 ## Autodiscovery of Offsets
 On systems that are BTF enabled, Sysmon will use BTF for accurate kernel offsets.
 Sysmon also supports specifying standalone BTF files (using /BTF switch). There are
-a number of different ways to generate BTF files and [BTFHub](https://github.com/aquasecurity/btfhub)
+several ways to generate BTF files and [BTFHub](https://github.com/aquasecurity/btfhub)
 has a number of standalone BTF files for different distributions/kernels.
 
 If BTF isn't available, Sysmon attempts to automatically discover the offsets of some
