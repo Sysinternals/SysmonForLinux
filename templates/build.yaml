@@ -1,5 +1,11 @@
+parameters:
+- name: srcFolder
+  type: string
+  default: ''
+
 steps:
 - script: |
+    cd ${{ parameters.srcFolder }}
     mkdir build && cd build
     cmake ..
     make
