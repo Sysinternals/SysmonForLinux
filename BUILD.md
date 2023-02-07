@@ -13,15 +13,7 @@ _packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.md)).
 
 - clang/llvm v10+
 
-### Ubuntu 22.04
-```
-sudo apt update
-dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libgmock-dev libjson-glib-dev
-```
-
-
-### Ubuntu 20.04
+### Ubuntu 20.04+
 ```
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
