@@ -27,7 +27,7 @@ pr:
 stages:
  - stage: "Build"
    jobs:
-    - job: "Build_Sysmon_Ubuntu_20_04"
+    - job: "Build_Sysmon_Ubuntu"
       pool:
         name: "Sysinternals-for-Linux-AME"
         demands:
@@ -37,9 +37,6 @@ stages:
         submodules: true
 
       - checkout: SysinternalsEBPF
-
-      - script: |
-          ls -a
 
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
