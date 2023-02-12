@@ -38,6 +38,9 @@ stages:
 
       - checkout: SysinternalsEBPF
 
+      - script: |
+          ls -a
+
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
           srcFolder: 'SysinternalsEBPF'
