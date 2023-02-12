@@ -41,7 +41,7 @@ stages:
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
           srcFolder: 'SysinternalsEBPF'
-      displayName: "Build Sysinternalsebpf"
+        displayName: "Build Sysinternalsebpf"
 
       - script: |
           cd $(Build.SourcesDirectory)/SysinternalsEBPF/build
@@ -52,4 +52,4 @@ stages:
       - template: templates/build.yaml
         parameters:
           srcFolder: '.'
-      displayName: "Build Sysmon"
+        displayName: "Build Sysmon"
