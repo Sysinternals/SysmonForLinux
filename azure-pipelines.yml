@@ -7,6 +7,11 @@ resources:
     endpoint: sysinternals
     name: sysinternals/SysmonforLinux
 
+  - repository: SysinternalsEBPF
+    type: github
+    endpoint: sysinternals
+    name: sysinternals/SysinternalsEBPF
+
 trigger:
     branches:
       include:
@@ -15,31 +20,34 @@ trigger:
       exclude:
         - dev/*
         - test/*
-  
+
 pr:
 - main
 
 stages:
  - stage: "Build"
    jobs:
-    - job: "Build_Sysmon_Ubuntu_20_04"
-      pool: 
+    - job: "Build_Sysmon_Ubuntu"
+      pool:
         name: "Sysinternals-for-Linux-AME"
         demands:
         - ImageOverride -equals sysmon-ubuntu-build-agent
       steps:
-      - checkout: Sysmon
+      - checkout: self
         submodules: true
 
+      - checkout: SysinternalsEBPF
+
+      - template: templates/build.yaml@SysinternalsEBPF
+        parameters:
+          srcFolder: 'SysinternalsEBPF'
+
       - script: |
-          wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-          dpkg -i packages-microsoft-prod.deb
-          apt -y update
-          apt -y install sysinternalsebpf
-        displayName: "Install Sysinternalsebpf dependency"
+          cd $(Build.SourcesDirectory)/SysinternalsEBPF/build
+          make install
+          ldconfig
+        displayName: "Install SysinternalsEBPF"
 
       - template: templates/build.yaml
-
-      - script: |
-          apt -y remove sysinternalsebpf
-        displayName: "Remove Sysinternalsebpf dependency"
+        parameters:
+          srcFolder: 'SysmonForLinux'

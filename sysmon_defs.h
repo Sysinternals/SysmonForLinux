@@ -55,6 +55,15 @@
 #define KERN_5_2_OBJ            "sysmonEBPFkern5.2.o"
 #define KERN_5_3_5_5_OBJ        "sysmonEBPFkern5.3-5.5.o"
 #define KERN_5_6__OBJ           "sysmonEBPFkern5.6-.o"
+#define KERN_4_15_CORE_OBJ      "sysmonEBPFkern4.15_core.o"
+#define KERN_4_16_CORE_OBJ      "sysmonEBPFkern4.16_core.o"
+#define KERN_4_17_5_1_CORE_OBJ  "sysmonEBPFkern4.17-5.1_core.o"
+#define KERN_5_2_CORE_OBJ       "sysmonEBPFkern5.2_core.o"
+#define KERN_5_3_5_5_CORE_OBJ   "sysmonEBPFkern5.3-5.5_core.o"
+#define KERN_5_6__CORE_OBJ       "sysmonEBPFkern5.6-_core.o"
+
+#define KERN_NUM_PROGRAMS       6
+
 #define SYSMONLOGVIEW_BINARY    "sysmonLogView"
 #define SYSTEMD_DIR             "/etc/systemd/system"
 #define SYSTEMD_SERVICE         "sysmon.service"

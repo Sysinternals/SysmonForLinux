@@ -59,7 +59,7 @@ typedef enum {
 } protocol;
 
 // network connection state change
-SEC("sysmon/inet_sock_set_state")
+SEC("tracepoint/sock/inet_sock_set_state")
 __attribute__((flatten))
 int TCPconnection(struct tracepoint__sock__inet_sock_set_state *args)
 {

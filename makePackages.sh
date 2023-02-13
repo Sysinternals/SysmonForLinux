@@ -64,7 +64,7 @@ cp "${PROJECT_BINARY_DIR}/sysmon" "${PROJECT_BINARY_DIR}/deb/${DEB_PACKAGE_NAME}
 # make the deb
 if [ "$DPKGDEB" != "" ]; then
     cd "${PROJECT_BINARY_DIR}/deb"
-    "$DPKGDEB" --build --root-owner-group "${DEB_PACKAGE_NAME}"
+    "$DPKGDEB" -Zxz --build --root-owner-group "${DEB_PACKAGE_NAME}"
 else
     echo "No dpkg-deb found"
 fi

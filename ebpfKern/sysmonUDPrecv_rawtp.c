@@ -25,7 +25,7 @@
 #include "sysmonHelpers.c"
 #include "sysmonUDPrecv.c"
 
-SEC("sysmon/UDPrecv/rawExit")
+SEC("raw_tracepoint/sys_exit")
 __attribute__((flatten))
 int UDPrecvRawExit(struct bpf_our_raw_tracepoint_args *ctx)
 {

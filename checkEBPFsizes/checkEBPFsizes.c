@@ -34,29 +34,21 @@
 #include <libelf.h>
 #include <gelf.h>
 #include <sys/mman.h>
+#include <linux/limits.h>
 #include <errno.h>
 #include <ctype.h>
-
+#include <libsysinternalsEBPF.h>
 
 int main(int argc, char *argv[])
 {
-    int fd = 0;
-    Elf *elf = NULL;
-    Elf_Scn *scn = NULL;
-    GElf_Ehdr ehdr;
-    GElf_Shdr shdr;
     int maxInsns = 0;
-    int numInsns = 0;
-    char *secName = NULL;
+    unsigned int numProgs = 0;
     bool fail = false;
+    ebpfProgramSizes* progs = NULL;
+
 
     if (argc < 3) {
         printf("Usage: %s <eBPF object> <max instructions>\n", argv[0]);
-        return 1;
-    }
-
-    if ((fd = open(argv[1], O_RDONLY)) <= 0) {
-        printf("%s: cannot open file %s: %s\n", argv[0], argv[1], strerror(errno));
         return 1;
     }
 
@@ -66,39 +58,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (elf_version(EV_CURRENT) == EV_NONE) {
-        printf("%s: WARNING Elf Library is out of date!\n", argv[0]);
-    }
-
-    //
-    // init elf pointer
-    //
-    elf = elf_begin(fd, ELF_C_READ, NULL);
-    gelf_getehdr(elf, &ehdr);
-
-    printf("\neBPF Program Sizes: (max %d)\n\n", maxInsns);
-
-    //
-    // find sections
-    //
-    while((scn = elf_nextscn(elf, scn)) != NULL) {
-        gelf_getshdr(scn, &shdr);
-
-        if (shdr.sh_type == SHT_PROGBITS && shdr.sh_size > 0) {
-            secName = elf_strptr(elf, ehdr.e_shstrndx, shdr.sh_name);
-            if (secName != NULL && secName[0] != 0x00 && secName[0] != '.' &&
-                    strcmp(secName, "maps") != 0 && strcmp(secName, "license") != 0) {
-
-                numInsns = shdr.sh_size / sizeof(uint64_t);
-
-                printf("%s: %d\n", secName, numInsns);
-
-                if (numInsns > maxInsns) {
-                    printf("  Error: %s is greater than max instructions: %d > %d\n", secName, numInsns, maxInsns);
-                    fail = true;
-                }
+    numProgs = getEbpfProgramSizes(argv[1], &progs);
+    if(numProgs>0)
+    {
+        for(int i=0; i<numProgs; i++)
+        {
+            if (progs[i].size > maxInsns)
+            {
+                printf("  Error: %s is greater than max instructions: %d > %d\n", progs[i].name, (int)progs[i].size, maxInsns);
+                fail = true;
             }
         }
+
+        free(progs);
     }
 
     printf("\n");

@@ -29,6 +29,8 @@
 //
 //====================================================================
 
+#include "missingdefs.h"
+
 __attribute__((always_inline))
 static inline char* set_FileOpen_info(
     PSYSMON_EVENT_HEADER eventHdr,
@@ -86,14 +88,14 @@ static inline char* set_FileOpen_info(
     memset(event->m_Extensions, 0, sizeof(event->m_Extensions));
 
     // Insert the UID as the SID
-    cred = (const void *)derefPtr(task, config->offsets.cred);
-    if (cred) {
-        *(uint64_t *)ptr = derefPtr(cred, config->offsets.cred_uid) & 0xFFFFFFFF;
+    *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
+    if(*(uint64_t *)ptr!=0)
+    {
         event->m_Extensions[LINUX_FO_Sid] = sizeof(uint64_t);
         ptr += sizeof(uint64_t);
     }
 
-    extLen = derefFilepathInto(ptr, task, config->offsets.exe_path, config);
+    extLen = copyExePath(ptr, task, config);
     event->m_Extensions[LINUX_FO_ImagePath] = extLen;
     extLen &= (MAX_PATH -1);
     ptr += extLen;
@@ -108,10 +110,20 @@ static inline char* set_FileOpen_info(
     timeDiffNs = 0;
     inode = derefInodeFromFd(task, eventArgs->returnCode, config);
     if (inode) {
+#ifdef EBPF_CO_RE
+        event->m_atime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_atime.tv_sec);
+        event->m_atime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_atime.tv_nsec);
+        event->m_mtime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_mtime.tv_sec);
+        event->m_mtime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_mtime.tv_nsec);
+        event->m_ctime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_ctime.tv_sec);
+        event->m_ctime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_ctime.tv_nsec);
+        event->m_Mode = BPF_CORE_READ((struct inode *)inode, i_mode);
+#else
         bpf_probe_read(&event->m_atime, sizeof(event->m_atime), inode + config->offsets.inode_atime[0]);
         bpf_probe_read(&event->m_mtime, sizeof(event->m_mtime), inode + config->offsets.inode_mtime[0]);
         bpf_probe_read(&event->m_ctime, sizeof(event->m_ctime), inode + config->offsets.inode_ctime[0]);
         bpf_probe_read(&event->m_Mode, sizeof(event->m_Mode), inode + config->offsets.inode_mode[0]);
+#endif
 
         fileTimeNs = (event->m_atime.tv_sec * 1000 * 1000 * 1000) + event->m_atime.tv_nsec;
         if (fileTimeNs > eventTimeNs) {

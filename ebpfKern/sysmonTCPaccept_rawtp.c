@@ -25,7 +25,7 @@
 #include "sysmonHelpers.c"
 #include "sysmonTCPaccept.c"
 
-SEC("sysmon/TCPaccept/rawExit")
+SEC("raw_tracepoint/sys_exit")
 __attribute__((flatten))
 int TCPacceptRawExit(struct bpf_our_raw_tracepoint_args *ctx)
 {

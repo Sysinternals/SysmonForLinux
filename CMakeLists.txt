@@ -68,7 +68,7 @@ configure_file(package/SPECS.in/spec.in SPECS.spec)
 #
 # external programs used by this build
 #
-set(TEXTTRANSFORM "/usr/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe")
+set(TEXTTRANSFORM "/root/.dotnet/tools/t4")
 set(ICONV "/usr/bin/iconv")
 set(LD "/usr/bin/ld")
 
@@ -79,8 +79,9 @@ set(PACKAGE_NAME "sysmonforlinux")
 
 #
 # report warnings as errors
+# -g is required for BTF and CO:RE
 #
-add_compile_options(-Wall -Werror)
+add_compile_options(-Wall -Werror -g)
 
 #
 # support for C++17
@@ -134,6 +135,12 @@ add_executable(sysmon
                sysmonEBPFkern5.2.o.o
                sysmonEBPFkern5.3-5.5.o.o
                sysmonEBPFkern5.6-.o.o
+               sysmonEBPFkern4.15_core.o.o
+               sysmonEBPFkern4.16_core.o.o
+               sysmonEBPFkern4.17-5.1_core.o.o
+               sysmonEBPFkern5.2_core.o.o
+               sysmonEBPFkern5.3-5.5_core.o.o
+               sysmonEBPFkern5.6-_core.o.o
                sysmonLogView.o
                sysmon.d.o
                sysmon.service.o
@@ -143,6 +150,12 @@ add_executable(sysmon
                sysmonEBPFkern5.2.rep
                sysmonEBPFkern5.3-5.5.rep
                sysmonEBPFkern5.6-.rep
+               sysmonEBPFkern4.15_core.rep
+               sysmonEBPFkern4.16_core.rep
+               sysmonEBPFkern4.17-5.1_core.rep
+               sysmonEBPFkern5.2_core.rep
+               sysmonEBPFkern5.3-5.5_core.rep
+               sysmonEBPFkern5.6-_core.rep
                )
 
 target_include_directories(sysmon PUBLIC
@@ -153,7 +166,7 @@ target_include_directories(sysmon PUBLIC
                            "/usr/local/include"
                            "${LIBXML2_INCLUDE_DIR}"
                            "/opt/sysinternalsEBPF/ebpfKern"
-                           )
+                          )
 
 
 add_custom_target(packages
@@ -181,7 +194,7 @@ add_custom_command(OUTPUT sysmonEBPFkern4.16.rep
                    COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.16.o 4096 && touch sysmonEBPFkern4.16.rep
                    COMMENT "Checking sysmonEBPFkern4.16.o"
                    DEPENDS checkEBPFsizes sysmonEBPFkern4.16.o
-                  )
+                 )
 
 add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1.rep
                    COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.17-5.1.o 4096 && touch sysmonEBPFkern4.17-5.1.rep
@@ -207,6 +220,41 @@ add_custom_command(OUTPUT sysmonEBPFkern5.6-.rep
                    DEPENDS checkEBPFsizes sysmonEBPFkern5.6-.o
                   )
 
+add_custom_command(OUTPUT sysmonEBPFkern4.15_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.15_core.o 4096 touch sysmonEBPFkern4.15_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.15_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.15_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern4.16_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.16_core.o 4096 && touch sysmonEBPFkern4.16_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.16_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.16_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern4.17-5.1_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern4.17-5.1_core.o 4096 && touch sysmonEBPFkern4.17-5.1_core.rep
+                   COMMENT "Checking sysmonEBPFkern4.17-5.1_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern4.17-5.1_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.2_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.2_core.o 32768 && touch sysmonEBPFkern5.2_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.2_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.2_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.3-5.5_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.3-5.5_core.o 32768 && touch sysmonEBPFkern5.3-5.5_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.3-5.5_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.3-5.5_core.o
+                  )
+
+add_custom_command(OUTPUT sysmonEBPFkern5.6-_core.rep
+                   COMMAND "${CMAKE_BINARY_DIR}/checkEBPFsizes" sysmonEBPFkern5.6-_core.o 32768 && touch sysmonEBPFkern5.6-_core.rep
+                   COMMENT "Checking sysmonEBPFkern5.6-_core.o"
+                   DEPENDS checkEBPFsizes sysmonEBPFkern5.6-_core.o
+                  )
 
 # list of files the EBPF programs depend upon
 set(EBPF_DEPENDS
@@ -303,8 +351,7 @@ target_include_directories(checkEBPFsizes PUBLIC
                            "/usr/include"
                            )
 
-target_link_libraries(checkEBPFsizes elf)
-
+target_link_libraries(checkEBPFsizes sysinternalsEBPF)
 
 #
 # GTest required for unit tests
@@ -370,25 +417,25 @@ add_custom_command(OUTPUT yoursleep
 # automatically generate sources from manifest.xml and manifest.tt
 #
 add_custom_command(OUTPUT sysmonevents.h.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonevents.h.utf16 -a '!!type!header'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonevents.h.utf16 -a '!!type!header'
                    COMMENT "Extracting sysmonevents.h.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonevents.h
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonevents.h.utf16 -o sysmonevents.h
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonevents.h.utf16 -o sysmonevents.h
                    COMMENT "Converting sysmonevents.h.utf16 to UTF8"
                    DEPENDS sysmonevents.h.utf16
                    )
 
 add_custom_command(OUTPUT sysmonmsg.mc.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsg.mc.utf16 -a '!!version!internal' -a '!!type!mc'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsg.mc.utf16 -a '!!version!internal' -a '!!type!mc'
                    COMMENT "Extracting sysmonmsg.mc.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonmsg.mc
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonmsg.mc.utf16 -o sysmonmsg.mc
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonmsg.mc.utf16 -o sysmonmsg.mc
                    COMMENT "Converting sysmonmsg.mc.utf16 to UTF8"
                    DEPENDS sysmonmsg.mc.utf16
                    )
@@ -400,13 +447,13 @@ add_custom_command(OUTPUT sysmonmsg.h
                    )
 
 add_custom_command(OUTPUT sysmonmsgop.man.utf16
-                   COMMAND "mono" "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsgop.man.utf16 -a '!!version!internal' -a '!!type!man'
+                   COMMAND "${TEXTTRANSFORM}" "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt" -out sysmonmsgop.man.utf16 -a '!!version!internal' -a '!!type!man'
                    COMMENT "Extracting sysmonmsgop.man.utf16"
                    DEPENDS "${SYSMON_COMMON_SOURCE_DIR}/manifest.tt"
                    )
 
 add_custom_command(OUTPUT sysmonmsgop.man
-                   COMMAND "${ICONV}" -f UTF-16LE -t UTF-8 sysmonmsgop.man.utf16 -o sysmonmsgop.man
+                   COMMAND "${ICONV}" -f ASCII -t UTF-8 sysmonmsgop.man.utf16 -o sysmonmsgop.man
                    COMMENT "Converting sysmonmsgop.man.utf16 to UTF8"
                    DEPENDS sysmonmsgop.man.utf16
                    )
@@ -423,7 +470,7 @@ add_custom_command(OUTPUT sysmonmsgop.c
                    DEPENDS sysmonmsgop.man
                    )
 
-# 
+#
 # convert embedded files to objects for linking with the sysmon binary
 #
 add_custom_command(OUTPUT manifest.xml.o
@@ -439,6 +486,12 @@ set(PACKED_BINARY_FILES
     sysmonEBPFkern5.2.o
     sysmonEBPFkern5.3-5.5.o
     sysmonEBPFkern5.6-.o
+    sysmonEBPFkern4.15_core.o
+    sysmonEBPFkern4.16_core.o
+    sysmonEBPFkern4.17-5.1_core.o
+    sysmonEBPFkern5.2_core.o
+    sysmonEBPFkern5.3-5.5_core.o
+    sysmonEBPFkern5.6-_core.o
     sysmonLogView
     sysmon.service
     sysmon.d
@@ -485,10 +538,12 @@ set(CLANG_OPTIONS -Wno-unused-value
                   -Wno-address-of-packed-member
                   -Wno-tautological-compare
                   -Wno-unknown-warning-option
+                  -g
                   )
 set(CLANG_DEFINES -D __KERNEL__
                   -D __BPF_TRACING__
                   -D __TARGET_ARCH_x86
+                  -D __linux__
                   )
 if (DEBUG_K)
     message("Using DEBUG_K Option...")
@@ -506,6 +561,8 @@ set(CLANG_INCLUDES
                    -I "${libbpf_SOURCE_DIR}/src"
                    )
 
+set(EBPF_CORE_PROG_SUFFIX "_core")
+
 #
 # EBPF
 #
@@ -513,28 +570,35 @@ set(CLANG_INCLUDES
 #
 
 # function to make ebpf programs
-function(build_ebpf ebpfsrc)
-    add_custom_command(OUTPUT ${ebpfsrc}.o
-                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -emit-llvm -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o -| "${LLC}" -march=bpf -filetype=obj -o "${ebpfsrc}.o"
-                       COMMENT "Building EBPF object ${ebpfsrc}.o"
+function(build_ebpf ebpfsrc suffix)
+    add_custom_command(OUTPUT ${ebpfsrc}${suffix}.o
+                       COMMAND "${CLANG}" -nostdinc -isystem `gcc -print-file-name=include` ${CLANG_INCLUDES} ${CLANG_DEFINES} -O2 ${CLANG_OPTIONS} -target bpf -fno-stack-protector -c "${CMAKE_SOURCE_DIR}/ebpfKern/${ebpfsrc}.c" -o "${ebpfsrc}${suffix}.o"
+                       COMMENT "Building EBPF object ${ebpfsrc}${suffix}.o"
                        DEPENDS ebpfKern/${ebpfsrc}.c ${EBPF_DEPENDS}
                        )
 endfunction()
 
-# loop for all ebpf programs
+# Loop for all ebpf programs
 foreach(EBPF_PROG IN LISTS EBPF_PROGS)
 
     # add custom target to build all ebpf programs with 'all'
     add_custom_target(${EBPF_PROG} ALL
                       DEPENDS "${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c"
-                      )
+                     )
 
     # test to only build ebpf programs when they have changed
     if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}.o)
-        build_ebpf(${EBPF_PROG})
+        # first build NON CORE program
+        list(REMOVE_ITEM CLANG_DEFINES -DEBPF_CO_RE)
+        build_ebpf(${EBPF_PROG} "")
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
     endif()
 
-    # add ebpf programs to clean
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
-endforeach(EBPF_PROG)
+    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o)
+        # next build CORE program
+        list(APPEND CLANG_DEFINES -DEBPF_CO_RE)
+        build_ebpf(${EBPF_PROG} ${EBPF_CORE_PROG_SUFFIX})
+        set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o)
+    endif()
 
+endforeach(EBPF_PROG)

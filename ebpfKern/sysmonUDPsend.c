@@ -39,7 +39,7 @@ struct tracepoint__skb_consume_skb {
 };
 
 // network connection state change
-SEC("sysmon/consume_skb")
+SEC("tracepoint/skb/consume_skb")
 __attribute__((flatten))
 int UDPsend(struct tracepoint__skb_consume_skb *args)
 {
@@ -57,14 +57,15 @@ int UDPsend(struct tracepoint__skb_consume_skb *args)
     uint16_t frameType = 0;
     uint16_t plen = 0;
     uint16_t headerSize = 0;
-    uint64_t index1 = 0; 
-    uint64_t index2 = 0; 
+    uint64_t index1 = 0;
+    uint64_t index2 = 0;
     packetAddrs *p = NULL;
     packetAddrs pAddrs;
     LONGLONG *lastTimeAddr = NULL;
     LONGLONG lastTime = 0;
     LONGLONG curTime = 0;
     bool IPv4 = true;
+    struct sk_buff* tmp = NULL;
 
     if (!getConfig(&config, &pidTid))
         return 0;
@@ -75,11 +76,21 @@ int UDPsend(struct tracepoint__skb_consume_skb *args)
         return 0;
 
     // get address of packet data from skbaddr
+#ifdef EBPF_CO_RE
+    tmp = (struct sk_buff*) args->skbaddr;
+    dataAddr = BPF_CORE_READ((struct sk_buff*)tmp, data);
+#else
     if (bpf_probe_read(&dataAddr, sizeof(dataAddr), args->skbaddr + config->offsets.skb_data[0]) < 0)
         return 0;
+#endif
 
+#ifdef EBPF_CO_RE
+    tmp = (struct sk_buff*) args->skbaddr;
+    networkHeader = BPF_CORE_READ((struct sk_buff*)tmp, network_header);
+#else
     if (bpf_probe_read(&networkHeader, sizeof(networkHeader), args->skbaddr + config->offsets.skb_network_header[0]) < 0)
         return 0;
+#endif
 
     // get packet data buffer
     data = bpf_map_lookup_elem(&packetStorageMap, &cpuId);

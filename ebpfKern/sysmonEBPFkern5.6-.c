@@ -28,7 +28,7 @@
 //
 //====================================================================
 
-#define FILEPATH_NUMDIRS 32
+#define FILEPATH_NUMDIRS 16
 
 #include "sysmonGenericEntry_rawtp.c"
 #include "sysmonProcCreate_rawtp.c"

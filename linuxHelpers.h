@@ -22,6 +22,7 @@
 //
 //====================================================================
 
+#include <unistd.h>
 #include <sys/stat.h>
 #include "linuxTypes.h"
 #include "ioctlcmd.h"

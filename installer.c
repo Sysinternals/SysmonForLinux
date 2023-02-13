@@ -57,6 +57,18 @@ extern char _binary_sysmonEBPFkern5_3_5_5_o_start[];
 extern char _binary_sysmonEBPFkern5_3_5_5_o_end[];
 extern char _binary_sysmonEBPFkern5_6__o_start[];
 extern char _binary_sysmonEBPFkern5_6__o_end[];
+extern char _binary_sysmonEBPFkern4_15_core_o_start[];
+extern char _binary_sysmonEBPFkern4_15_core_o_end[];
+extern char _binary_sysmonEBPFkern4_16_core_o_start[];
+extern char _binary_sysmonEBPFkern4_16_core_o_end[];
+extern char _binary_sysmonEBPFkern4_17_5_1_core_o_start[];
+extern char _binary_sysmonEBPFkern4_17_5_1_core_o_end[];
+extern char _binary_sysmonEBPFkern5_2_core_o_start[];
+extern char _binary_sysmonEBPFkern5_2_core_o_end[];
+extern char _binary_sysmonEBPFkern5_3_5_5_core_o_start[];
+extern char _binary_sysmonEBPFkern5_3_5_5_core_o_end[];
+extern char _binary_sysmonEBPFkern5_6__core_o_start[];
+extern char _binary_sysmonEBPFkern5_6__core_o_end[];
 
 mode_t dirMode = S_IRWXU;
 mode_t fileMode = S_IRUSR | S_IWUSR;
@@ -160,6 +172,48 @@ bool installFiles(bool force)
     if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_5_6__OBJ,
         _binary_sysmonEBPFkern5_6__o_start,
         _binary_sysmonEBPFkern5_6__o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_4_15_CORE_OBJ,
+        _binary_sysmonEBPFkern4_15_core_o_start,
+        _binary_sysmonEBPFkern4_15_core_o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_4_16_CORE_OBJ,
+        _binary_sysmonEBPFkern4_16_core_o_start,
+        _binary_sysmonEBPFkern4_16_core_o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_4_17_5_1_CORE_OBJ,
+        _binary_sysmonEBPFkern4_17_5_1_core_o_start,
+        _binary_sysmonEBPFkern4_17_5_1_core_o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_5_2_CORE_OBJ,
+        _binary_sysmonEBPFkern5_2_core_o_start,
+        _binary_sysmonEBPFkern5_2_core_o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_5_3_5_5_CORE_OBJ,
+        _binary_sysmonEBPFkern5_3_5_5_core_o_start,
+        _binary_sysmonEBPFkern5_3_5_5_core_o_end,
+        force,
+        fileMode))
+        return false;
+
+    if (!dropFile(SYSMON_INSTALL_DIR "/" KERN_5_6__CORE_OBJ,
+        _binary_sysmonEBPFkern5_6__core_o_start,
+        _binary_sysmonEBPFkern5_6__core_o_end,
         force,
         fileMode))
         return false;
@@ -578,7 +632,7 @@ char *readFieldSizes()
         close(fd);
         return NULL;
     }
- 
+
     read(fd, data, st.st_size);
     close(fd);
 

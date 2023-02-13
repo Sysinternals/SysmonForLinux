@@ -48,14 +48,14 @@ static inline char* set_fileCreate_ext(
     memset(event->m_Extensions, 0, sizeof(event->m_Extensions));
 
     // Insert the UID as the SID
-    cred = (const void *)derefPtr(task, config->offsets.cred);
-    if (cred) {
-        *(uint64_t *)ptr = derefPtr(cred, config->offsets.cred_uid) & 0xFFFFFFFF;
+    *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
+    if(*(uint64_t *)ptr!=0)
+    {
         event->m_Extensions[FC_Sid] = sizeof(uint64_t);
         ptr += sizeof(uint64_t);
     }
 
-    extLen = derefFilepathInto(ptr, task, config->offsets.exe_path, config);
+    extLen = copyExePath(ptr, task, config);
     event->m_Extensions[FC_ImagePath] = extLen;
     extLen &= (PATH_MAX -1);
     ptr += extLen;

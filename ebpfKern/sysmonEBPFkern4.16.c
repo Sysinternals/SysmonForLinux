@@ -31,7 +31,7 @@
 #define SUB4096 1
 #define NOLOOPS 1
 
-#define FILEPATH_NUMDIRS 6
+#define FILEPATH_NUMDIRS 5
 
 #include "sysmonGenericEntry_tp.c"
 #include "sysmonProcCreate_tp.c"
