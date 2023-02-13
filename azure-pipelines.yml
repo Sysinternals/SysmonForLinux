@@ -48,6 +48,10 @@ stages:
           ldconfig
         displayName: "Install SysinternalsEBPF"
 
+      - script: |
+          which t4
+          ls /root/.dotnet/tools
+
       - template: templates/build.yaml
         parameters:
           srcFolder: 'SysmonForLinux'
