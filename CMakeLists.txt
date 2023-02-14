@@ -68,7 +68,7 @@ configure_file(package/SPECS.in/spec.in SPECS.spec)
 #
 # external programs used by this build
 #
-set(TEXTTRANSFORM "/root/.dotnet/tools/t4")
+set(TEXTTRANSFORM "$ENV{HOME}/.dotnet/tools/t4")
 set(ICONV "/usr/bin/iconv")
 set(LD "/usr/bin/ld")
 

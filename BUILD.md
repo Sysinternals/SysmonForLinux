@@ -8,8 +8,9 @@ the
 [SysinternalsEBPF](https://github.com/Sysinternals/SysinternalsEBPF)
 project or via the `sysinternalsebpf` DEB package from the
 _packages.microsoft.com_ repository (see [INSTALL.md](INSTALL.md)).
+If you installed SysinternalsEBPF via make install, you may need to add /usr/local/lib to the loader library path (LD_LIBRARY_PATH).
 
-- .NET (latest) SDK. Please see [.NET Installation](https://learn.microsoft.com/en-us/dotnet/core/install/linux)
+- .NET 6 SDK. Please see [.NET Installation](https://learn.microsoft.com/en-us/dotnet/core/install/linux)
 
 - clang/llvm v10+
 
@@ -40,22 +41,22 @@ under `/usr/local`:
 
 ### Rocky 9
 ```
-dnf install dnf-plugins-core
-dnf config-manager --set-enabled crb
-dnf install epel-release
+sudo dnf install dnf-plugins-core
+sudo dnf config-manager --set-enabled crb
+sudo dnf install epel-release
 
-dnf update
+sudo dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
 ```
 
 ### Rocky 8
 ```
-dnf install dnf-plugins-core
-dnf install epel-release
-dnf config-manager --set-enabled powertools
+sudo dnf install dnf-plugins-core
+sudo dnf install epel-release
+sudo dnf config-manager --set-enabled powertools
 
-dnf update
+sudo dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
 ```
