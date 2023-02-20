@@ -1,6 +1,6 @@
 # Install Sysmon
 
-## Ubuntu 18.04, 20.04 & 21.04
+## Ubuntu 18.04, 20.04
 #### 1. Register Microsoft key and feed
 ```sh
 wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -116,7 +116,11 @@ sudo zypper install sysmonforlinux
 ## SLES 15
 #### 1. Register Microsoft key and feed
 ```sh
-sudo rpm -Uvh https://packages.microsoft.com/config/sles/15/packages-microsoft-prod.rpm
+sudo zypper install libicu
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+wget -q https://packages.microsoft.com/config/sles/15/prod.repo
+sudo mv prod.repo /etc/zypp/repos.d/microsoft-prod.repo
+sudo chown root:root /etc/zypp/repos.d/microsoft-prod.repo
 ```
 
 #### 2. Install SysmonForLinux
