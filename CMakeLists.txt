@@ -105,6 +105,21 @@ set(SYSMON_TESTS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/sysmonCommon/UnitTests/")
 endif()
 
 #
+# Compress man page
+#
+set(SYSMON_COMPRESS_MAN "sysmon.8.gz")
+
+add_custom_target(SYSMON_MAN_COMPRESS ALL
+                  DEPENDS ${PROJECT_BINARY_DIR}/${SYSMON_COMPRESS_MAN}
+                  )
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/${SYSMON_COMPRESS_MAN}
+                   COMMAND gzip -f -c "${CMAKE_SOURCE_DIR}/package/usr/share/man/man8/sysmon.8" > ${PROJECT_BINARY_DIR}/${SYSMON_COMPRESS_MAN}
+                   COMMENT "Compressing Sysmon man page"
+                   DEPENDS "${CMAKE_SOURCE_DIR}/package/usr/share/man/man8/sysmon.8"
+                  )
+
+#
 # make sysmon
 #
 add_executable(sysmon

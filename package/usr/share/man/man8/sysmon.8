@@ -1,0 +1,93 @@
+.\" Manpage for Sysinternals Sysmon For Linux.
+.\" Contact via http://github/Sysinternals to correct errors or typos.
+.TH SYSMON 8 "23 Feb 2023" "1.1.0" "System Manager's Manual"
+
+.SH NAME
+sysmon \- System Monitor from Sysinternals
+
+.SH SYNOPSIS
+sysmon [options]
+
+.SH DESCRIPTION
+System Monitor (Sysmon) is a system service and set of eBPF programs that,
+once installed on a system, remains resident across system reboots to monitor
+and log system activity to the Syslog. It provides detailed information about
+process creations, network connections, and file creations and deletions. By
+collecting the events it generates using SIEM agents and subsequently analyzing
+them, you can identify malicious or anomalous activity and understand how
+intruders and malware operate on your network.
+
+Note that Sysmon does not provide analysis of the events it generates, nor does
+it attempt to protect or hide itself from attackers.
+
+Sysmon includes the following capabilities:
+
+.IP \[bu] 2
+Logs process creation with full command line for both current and parent
+processes.
+.IP \[bu]
+Includes a process GUID in process create events to allow for correlation of
+events even when Linux reuses process IDs.
+.IP \[bu]
+Includes a session GUID in each event to allow correlation of events on same
+logon session.
+.IP \[bu]
+Logs file creations and deletions.
+.IP \[bu]
+Logs opens for raw read access of disks and volumes.
+.IP \[bu]
+Optionally logs network connections, including each connection’s source
+process, IP addresses and port numbers.
+.IP \[bu]
+Logs ptrace (process access) activity.
+.IP \[bu]
+Rule filtering to include or exclude certain events dynamically.
+
+.PP
+Events are stored in the Syslog, often found at /var/log/syslog.
+
+Use the '\-? config' command for configuration file documentation. More
+examples are available on the Sysinternals website.
+
+Specify '\-accepteula' to automatically accept the EULA on installation.
+
+Neither install nor uninstall requires a reboot.
+
+.SH OPTIONS
+  \-c [config]   Update configuration of an installed Sysmon driver or dump the
+                current configuration if no other argument is provided. Optionally
+                take a configuration file.
+  \-i [config]   Install service and driver. Optionally take a configuration file.
+  \-s            Print configuration schema definition of the specified version.
+                Specify 'all' to dump all schema versions (default is latest)).
+  \-u            Uninstall service and driver. Adding force causes uninstall to proceed
+                even when some components are not installed.
+  \-btf <path>   Uses the specified offline BTF file.
+  \-?            Help.
+  \-? config     Configuration help.
+  \-accepteula   Accept the EULA.
+
+.SH SEE ALSO
+ps(1), perf(1), top(1), procmon(1), procdump(1)
+
+.SH BUGS
+No known bugs.
+
+.SH NOTES
+File paths are typically constructed in eBPF by traversing the file system.
+It is possible that system limits will in some cases prevent the full path
+from being recovered. In this situations, the first character of the path will
+be a '+' to indicate that more directories may have preceded it.
+
+.SH AUTHOR
+Sysinternals - www.sysinternals.com
+
+Mark Russinovich, Thomas Garnier and Kevin Sheldrake
+
+Copyright (C) 2014-2023 Microsoft Corporation
+
+.SH COPYRIGHT
+The userland part of Sysmon is licensed under MIT; the eBPF parts are licensed
+under GPL2.
+
+
