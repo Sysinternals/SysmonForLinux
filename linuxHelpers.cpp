@@ -220,7 +220,7 @@ BOOLEAN GetProcess(
     } else {
         imagePath[0] = 0x00;
     }
-    
+
     snprintf( pathFile, 32, "/proc/%d/cwd", ProcessId );
     numRead = readlink( pathFile, cwd, PATH_MAX-1 );
     if (numRead > 0) {
@@ -484,7 +484,7 @@ GetProcessName(
         fclose(fp);
 	}
 
-	if (numRead == 0) {
+	if (numRead <= 1) {
 		numRead = readlink(exeFile, processPath, PATH_MAX-1);
         if ((int64_t)numRead <= 0) {
             return FALSE;
