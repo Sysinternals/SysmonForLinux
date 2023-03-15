@@ -47,7 +47,6 @@
 #include "linuxHelpers.h"
 #include "sysmon_defs.h"
 #include "linuxVersion.h"
-#include "eula.h"
 #include "networkTracker.h"
 #include "installer.h"
 
@@ -664,65 +663,6 @@ CheckRootPrivs()
     }
 }
 
-
-//--------------------------------------------------------------------
-//
-// AcceptEula
-//
-// Record acceptance of the EULA by creating the file
-// /opt/sysmon/eula_accepted
-//
-//--------------------------------------------------------------------
-void
-AcceptEula()
-{
-    struct stat dir;
-    FILE* fp = NULL;
-
-    if (stat(SYSMON_INSTALL_DIR, &dir)) {
-        mkdir(SYSMON_INSTALL_DIR, S_IRWXU);
-    }
-    fp = fopen(SYSMON_EULA_FILE, "w");
-    if (fp != NULL) {
-        fclose(fp);
-    }
-}
-
-//--------------------------------------------------------------------
-//
-// EulaAccepted
-//
-// Check if the EULA has already been accepted by checking for the
-// existance of the file /opt/sysmon/eula_accepted
-//
-//--------------------------------------------------------------------
-BOOL
-EulaAccepted()
-{
-    struct stat eula_stat;
-
-    if (stat(SYSMON_EULA_FILE, &eula_stat) == 0) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-//--------------------------------------------------------------------
-//
-// ShowEula
-//
-// Display the EULA text.
-//
-//--------------------------------------------------------------------
-void
-ShowEula()
-{
-    printf("%s\n\n", RawEulaText);
-    printf("This is the first run of this program. You must accept EULA to run Sysmon.\n");
-    printf("Use -accepteula to accept EULA.\n\n");
-}
-
 //--------------------------------------------------------------------
 //
 // WriteRulesBlob
@@ -1156,15 +1096,6 @@ main(
     }
 
     CheckRootPrivs();
-
-    if (OPT_SET(AcceptEula)) {
-        AcceptEula();
-    }
-
-    if (!EulaAccepted() && !OPT_SET(AcceptEula)) {
-        ShowEula();
-        return ERROR_INVALID_PARAMETER;
-    }
 
     if ( OPT_SET(UnInstall) ) {
         const char *uninstallModeOption = OPT_VALUE( UnInstall );

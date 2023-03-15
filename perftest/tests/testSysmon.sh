@@ -5,7 +5,7 @@ sudo service auoms stop
 killall execPerSec
 sudo auditctl -D
 
-sudo /opt/sysmon/sysmon -accepteula -i ./onlyProcCreate.xml > /dev/null
+sudo /opt/sysmon/sysmon -i ./onlyProcCreate.xml > /dev/null
 sysmonpid=`ps -ef | grep sysmon | grep -v grep | awk '{print $2}'`
 journaldpid=`ps -ef | grep systemd-journald | grep -v grep | awk '{print $2}'`
 rsyslogdpid=`ps -ef | grep rsyslogd | grep -v grep | awk '{print $2}'`
