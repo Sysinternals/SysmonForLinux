@@ -27,4 +27,4 @@ rm -rf $RPM_BUILD_ROOT
 if [ -d /opt/sysmon ]; then rm -rf /opt/sysmon; fi
 
 %preun
-sysmon -accepteula -u
+sysmon -u

@@ -104,7 +104,6 @@ sudo ./sysmon -?
 
 ## Install
 ```
-sudo ./sysmon -accepteula
 sudo ./sysmon -i CONFIG_FILE
 ```
 This will install sysmon and associated files into the /opt/sysmon directory.
