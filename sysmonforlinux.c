@@ -1195,6 +1195,13 @@ main(
 
     if ( OPT_SET(Install) ) {
 
+        killOtherSysmon(true); // just to be sure
+
+        if (!installFiles(true)) {
+            fprintf(stderr, "Cannot install Sysmon files\n");
+            exit(1);
+        }
+
         if ( !OPT_SET(Service) ) {
             stopSysmonService();
 
@@ -1221,13 +1228,6 @@ main(
                 fprintf(stderr, "Cannot write argv and argc\n");
                 exit(1);
             }
-        }
-
-        killOtherSysmon(true); // just to be sure
-
-        if (!installFiles(true)) {
-            fprintf(stderr, "Cannot install Sysmon files\n");
-            exit(1);
         }
 
         //
