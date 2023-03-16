@@ -13,6 +13,9 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior.
 
+**Sysmon version**
+Version of Sysmon or if built from source.
+
 **Distro/kernel version**
 The distribution and kernel version.
 
