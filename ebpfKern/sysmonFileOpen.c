@@ -148,7 +148,10 @@ static inline char* set_FileOpen_info(
         extLen = resolveFdPath(ptr, eventArgs->returnCode, task, config);
 
         event->m_Extensions[LINUX_FO_PathName] = extLen;
-        ptr += (extLen & (PATH_MAX - 1));
+        asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
+                    "%[ptr] += %[extLen]"
+                    :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                    );
 
         return ptr;
     } else {

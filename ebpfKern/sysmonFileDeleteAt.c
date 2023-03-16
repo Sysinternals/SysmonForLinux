@@ -125,7 +125,10 @@ static inline char* set_FileDeleteAt_info(
         if (extLen <= 0)
             return (char *)eventHdr;
         event->m_Extensions[FD_FileName] = extLen;
-        ptr += (extLen & (PATH_MAX - 1));
+        asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
+                    "%[ptr] += %[extLen]"
+                    :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                    );
     }
 
     extLen = copyExePath(ptr, task, config);

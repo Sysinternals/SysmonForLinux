@@ -87,7 +87,10 @@ static inline char* set_ProcAccessed_info(
     memset(event->m_Extensions, 0, sizeof(event->m_Extensions));
     extLen = copyExePath(ptr, task, config);
     event->m_Extensions[PA_ClientImage] = extLen;
-    ptr += (extLen & (PATH_MAX - 1));
+    asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
+                 "%[ptr] += %[extLen]"
+                 :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                 );
 
     // Insert the UID as the SID
     *(uint64_t *)ptr = getUid((struct task_struct*) task, config) & 0xFFFFFFFF;
