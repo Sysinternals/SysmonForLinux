@@ -63,7 +63,10 @@ static inline char* set_fileCreate_ext(
     extLen = resolveFdPath(ptr, eventArgs->returnCode, task, config);
 
     event->m_Extensions[FC_FileName] = extLen;
-    ptr += (extLen & (PATH_MAX - 1));
+    asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
+                 "%[ptr] += %[extLen]"
+                 :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                 );
 
     return ptr;
 }

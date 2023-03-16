@@ -60,7 +60,6 @@ static inline char* set_process_ext(
     //
     //    extLen &= (PATH_MAX -1);
     //    ptr += extLen;
-
     asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
                  "%[ptr] += %[extLen]"
                  :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
@@ -68,11 +67,17 @@ static inline char* set_process_ext(
 
     extLen = copyCommandline(ptr, task, config);
     event->m_Extensions[PC_CommandLine] = extLen;
-    ptr += (extLen & (CMDLINE_MAX_LEN - 1));
+    asm volatile("%[extLen] &= " XSTR(CMDLINE_MAX_LEN - 1) "\n"
+                 "%[ptr] += %[extLen]"
+                 :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                 );
 
     extLen = copyPwdPath(ptr, task, config);
     event->m_Extensions[PC_CurrentDirectory] = extLen;
-    ptr += (extLen & (PATH_MAX - 1));
+    asm volatile("%[extLen] &= " XSTR(PATH_MAX - 1) "\n"
+                 "%[ptr] += %[extLen]"
+                 :[extLen]"+&r"(extLen), [ptr]"+&r"(ptr)
+                 );
 
     return ptr;
 }
