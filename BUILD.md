@@ -18,14 +18,14 @@ If you installed SysinternalsEBPF via make install, you may need to add /usr/loc
 ```
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libgmock-dev libjson-glib-dev
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libgmock-dev libjson-glib-dev libc6-dev-i386
 ```
 
 ### Ubuntu 18.04
 ```
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libjson-glib-dev
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libjson-glib-dev libc6-dev-i386
 mkdir googletest-build
 cd googletest-build
 cmake /usr/src/googletest
@@ -47,7 +47,7 @@ sudo dnf install epel-release
 
 sudo dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
+sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel glibc-devel.i686
 ```
 
 ### Rocky 8
@@ -58,7 +58,7 @@ sudo dnf config-manager --set-enabled powertools
 
 sudo dnf update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel
+sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-build json-glib-devel python3 libxml2-devel gtest-devel gmock gmock-devel glibc-devel.i686
 ```
 
 ### Debian 11
@@ -68,7 +68,7 @@ sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev libc6-dev-i386
 ```
 
 ### Debian 10
@@ -78,7 +78,7 @@ sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 sudo apt update
 dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev
+sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev libc6-dev-i386
 ```
 
 ## Build
