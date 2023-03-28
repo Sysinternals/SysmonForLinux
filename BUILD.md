@@ -21,24 +21,6 @@ dotnet tool install --global dotnet-t4 --version 2.3.1
 sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libgmock-dev libjson-glib-dev libc6-dev-i386
 ```
 
-### Ubuntu 18.04
-```
-sudo apt update
-dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libxml2 libxml2-dev libzstd1 git libgtest-dev apt-transport-https dirmngr googletest google-mock libjson-glib-dev libc6-dev-i386
-mkdir googletest-build
-cd googletest-build
-cmake /usr/src/googletest
-make
-sudo make install
-```
-The googletest-related libraries are built from source and installed
-under `/usr/local`:
-- `/usr/local/include/gtest`
-- `/usr/local/include/gmock`
-- `/usr/local/lib/libgtest*.a`
-- `/usr/local/lib/libgmock*.a`
-
 ### Rocky 9
 ```
 sudo dnf install dnf-plugins-core
