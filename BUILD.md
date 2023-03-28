@@ -1,4 +1,5 @@
 # Build
+Please see the history of this file for instructions for older, unsupported versions.
 
 ## Prerequisites
 - SysinternalsEBPF being installed:
@@ -46,16 +47,6 @@ sudo yum install gcc gcc-c++ make cmake llvm clang elfutils-libelf-devel rpm-bui
 ### Debian 11
 ```
 wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-sudo dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-sudo apt update
-dotnet tool install --global dotnet-t4 --version 2.3.1
-sudo apt -y install build-essential gcc g++ make cmake libelf-dev llvm clang libzstd1 git libjson-glib-dev libxml2 libxml2-dev googletest google-mock libgmock-dev libc6-dev-i386
-```
-
-### Debian 10
-```
-wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 sudo apt update
