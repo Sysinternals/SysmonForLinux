@@ -1,4 +1,5 @@
 # Install Sysmon
+Please see the history of this file for instructions for older, unsupported versions.
 
 ## Ubuntu 20.04 & 22.04
 #### 1. Register Microsoft key and feed
@@ -9,25 +10,6 @@ sudo dpkg -i packages-microsoft-prod.deb
 
 #### 2. Install SysmonForLinux
 ```sh
-sudo apt-get update
-sudo apt-get install sysmonforlinux
-```
-
-## Debian 10
-#### 1. Register Microsoft key and feed
-```sh
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
-sudo mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-wget -q https://packages.microsoft.com/config/debian/10/prod.list
-sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
-sudo chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
-sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
-```
-
-#### 2. Install SysmonForLinux
-```sh
-sudo apt-get update
-sudo apt-get install apt-transport-https
 sudo apt-get update
 sudo apt-get install sysmonforlinux
 ```
