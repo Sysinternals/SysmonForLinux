@@ -153,7 +153,11 @@ static inline char* set_ProcCreate_info(
     }
 
     // get the creds
+#ifdef EBPF_CO_RE
+    cred = BPF_CORE_READ((struct task_struct *)task, cred);
+#else
     cred = (const void *)derefPtr(task, config->offsets.cred);
+#endif
     if (cred) {
 #ifdef EBPF_CO_RE
         event->m_AuthenticationId.LowPart = (DWORD) BPF_CORE_READ((struct task_struct *)task, cred, uid.val);
