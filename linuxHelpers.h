@@ -54,6 +54,7 @@ unsigned int LargeTimeMilliseconds( CONST PLARGE_INTEGER timestamp );
 unsigned int LargeTimeNanoseconds( CONST PLARGE_INTEGER timestamp );
 VOID LinuxFileTimeToLargeInteger( PLARGE_INTEGER timestamp, const my_statx_timestamp *filetime );
 VOID LargeIntegerToSystemTimeString( char *s, size_t sLen, CONST PLARGE_INTEGER timestamp );
+void LinuxGetFileHash(PTCHAR imagePath, char *stringBuffer, size_t stringBufferSize);
 pid_t GetTid();
 
 #ifdef __cplusplus
