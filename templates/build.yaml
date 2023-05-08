@@ -11,7 +11,7 @@ steps:
     make
   displayName: "Build Sysmon binaries"
 
-  - script: |
+- script: |
     cd ${{ parameters.srcFolder }}
     rm -rf build && mkdir build && cd build
     scan-build cmake ..
