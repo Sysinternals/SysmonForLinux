@@ -33,6 +33,8 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include <time.h>
+#include <pthread.h>
 
 #include "sysmonevents.h"
 
@@ -370,7 +372,7 @@ pair<string, unordered_set<string>> getFilter(char *s)
 // Note, this modifies the command line array.
 //
 //--------------------------------------------------------------------
-void processCmdline(int argc, char *argv[], 
+void processCmdline(int argc, char *argv[],
     unordered_set<unsigned int> *eventIds,
     unordered_map<unsigned int, unordered_set<string>> *eventIdFields,
     pair<unsigned long, unsigned long> *recordIdRange,
