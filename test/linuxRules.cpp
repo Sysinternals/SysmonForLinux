@@ -261,23 +261,26 @@ TEST( Process, ProcessName )
         {
             free(cmdline);
             free(cmdline_copy);
+            cmdline = NULL;
+            cmdline_copy = NULL;
             ASSERT_TRUE(false);
         }
-        else
-        {
-            if (child == 0) {
-                execve( test.exe, (char* const*)cmdline, NULL );
-            }
 
-            usleep(10000);
-            EXPECT_TRUE( GetProcessName( pName, test.len, child ) );
-            EXPECT_EQ( strcmp( pName, test.match ), 0 );
+        if (child == 0) {
+            execve( test.exe, (char* const*)cmdline, NULL );
+        }
 
-            kill( child, 9 );
-            if (cmdline != NULL) {
-                free(cmdline_copy);
-                free(cmdline);
-            }
+        usleep(10000);
+        EXPECT_TRUE( GetProcessName( pName, test.len, child ) );
+        EXPECT_EQ( strcmp( pName, test.match ), 0 );
+
+        kill( child, 9 );
+
+        if (cmdline != NULL) {
+            free(cmdline);
+        }
+        if (cmdline_copy != NULL) {
+            free(cmdline_copy);
         }
     }
 }
