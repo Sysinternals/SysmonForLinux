@@ -286,7 +286,7 @@ BOOLEAN GetProcess(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-truncation"
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
-// When using snprintf, the below fields get written past the end of the sysmon even struct memory region.
+// When using snprintf, the below fields get written past the end of the sysmon event struct memory region.
 // As such, source fortification (in)correctly flags the size of 'ptr' as being 0 and it fails with a buffer
 // overflow. We work around this by using memcpy instead.
     if (imagePathLen > 0) {

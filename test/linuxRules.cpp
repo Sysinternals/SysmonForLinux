@@ -260,7 +260,7 @@ TEST( Process, ProcessName )
         if (child < 0)
         {
             free(cmdline);
-            cmdline = NULL;
+            free(cmdline_copy);
             ASSERT_TRUE(false);
         }
 
