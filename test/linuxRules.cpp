@@ -263,19 +263,21 @@ TEST( Process, ProcessName )
             free(cmdline_copy);
             ASSERT_TRUE(false);
         }
+        else
+        {
+            if (child == 0) {
+                execve( test.exe, (char* const*)cmdline, NULL );
+            }
 
-        if (child == 0) {
-            execve( test.exe, (char* const*)cmdline, NULL );
-        }
+            usleep(10000);
+            EXPECT_TRUE( GetProcessName( pName, test.len, child ) );
+            EXPECT_EQ( strcmp( pName, test.match ), 0 );
 
-        usleep(10000);
-        EXPECT_TRUE( GetProcessName( pName, test.len, child ) );
-        EXPECT_EQ( strcmp( pName, test.match ), 0 );
-
-        kill( child, 9 );
-        if (cmdline != NULL) {
-            free(cmdline_copy);
-            free(cmdline);
+            kill( child, 9 );
+            if (cmdline != NULL) {
+                free(cmdline_copy);
+                free(cmdline);
+            }
         }
     }
 }
@@ -763,6 +765,7 @@ TEST( Events, DispatchEvent )
     ULONG eventSize = 0;
     size_t len = 0;
     int eventIdFd = 0;
+    const char* im = "/foo/bar/image";
 
 	*FakeSyslog = 0x00;
 
@@ -812,11 +815,8 @@ TEST( Events, DispatchEvent )
     eventSize = sizeof(SYSMON_EVENT_HEADER);
 
     ptr = (char*)(pc + 1);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-truncation"
-#pragma GCC diagnostic ignored "-Wstringop-overflow"
-    strcpy(ptr, "/foo/bar/image");
-#pragma GCC diagnostic pop
+    len = strlen(im) + 1;
+    memcpy(ptr, im, len);
     len = strlen(ptr) + 1;
     pc->m_Extensions[PC_ImagePath] = len;
     ptr += len;
