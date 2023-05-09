@@ -10,3 +10,10 @@ steps:
     cmake ..
     make
   displayName: "Build Sysmon binaries"
+
+- script: |
+    cd ${{ parameters.srcFolder }}
+    rm -rf build && mkdir build && cd build
+    scan-build cmake ..
+    scan-build -v --status-bugs -o verifier_result --exclude ../test -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
+  displayName: "Static analysis of Sysmon source code"

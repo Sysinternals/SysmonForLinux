@@ -235,8 +235,12 @@ bool installFiles(bool force)
             force,
             systemdFileMode))
             return false;
-        system(SYSTEMD_RELOAD_CMD);
-        system(SYSTEMD_ENABLE_CMD " " SYSTEMD_SERVICE);
+        if(system(SYSTEMD_RELOAD_CMD) == -1) {
+	        return false;
+	    }
+        if(system(SYSTEMD_ENABLE_CMD " " SYSTEMD_SERVICE) == -1) {
+	        return false;
+	    }
     } else if (dirExists(INITD_DIR)) {
         //
         // init.d / rc script managed system
@@ -275,7 +279,9 @@ bool installFiles(bool force)
 void uninstall()
 {
     if (dirExists(SYSTEMD_DIR)) {
-        system(SYSTEMD_DISABLE_CMD " " SYSTEMD_SERVICE);
+        if (system(SYSTEMD_DISABLE_CMD " " SYSTEMD_SERVICE) == -1) {
+            return;
+        }
     } else if (dirExists(INITD_DIR)) {
         setRunState(0, false);
         setRunState(1, false);
@@ -363,6 +369,7 @@ bool copyConfigFile(const char *configFile)
 //--------------------------------------------------------------------
 bool createEmptyConfigFile()
 {
+    bool ret = false;
     int fd = 0;
     char empty[] = "<Sysmon schemaversion=\"4.22\">\n<EventFiltering>\n</EventFiltering>\n</Sysmon>\n";
 
@@ -370,10 +377,13 @@ bool createEmptyConfigFile()
     if (fd < 0)
         return false;
 
-    write(fd, empty, strlen(empty) + 1);
+    if (write(fd, empty, strlen(empty) + 1) != -1) {
+        ret = true;
+    }
+
     close(fd);
 
-    return true;
+    return ret;
 }
 
 //--------------------------------------------------------------------
@@ -400,7 +410,11 @@ bool writeArgv(int argc, char *argv[])
     if (fd < 0)
         return false;
 
-    write(fd, &argc, sizeof(argc));
+    if (write(fd, &argc, sizeof(argc)) == -1) {
+        close(fd);
+        return false;
+    }
+
     close(fd);
 
     unlink(SYSMON_ARGV_FILE);
@@ -409,7 +423,10 @@ bool writeArgv(int argc, char *argv[])
         return false;
 
     for (int i=0; i<argc; i++) {
-        write(fd, argv[i], strlen(argv[i]) + 1);
+        if (write(fd, argv[i], strlen(argv[i]) + 1) == -1) {
+            close(fd);
+            return false;
+        }
     }
     close(fd);
 
@@ -448,7 +465,11 @@ bool readArgv(int *argc, char ***argv, char **configFile)
     if (fd < 0)
         return false;
 
-    read(fd, argc, sizeof(*argc));
+    if (read(fd, argc, sizeof(*argc)) == -1) {
+        close(fd);
+        return false;
+    }
+
     close(fd);
 
     ptrTableSize = sizeof(char *) * (*argc+1);
@@ -473,7 +494,11 @@ bool readArgv(int *argc, char ***argv, char **configFile)
     data = (char *)(*argv) + ptrTableSize;
 
     // read actual strings
-    read(fd, data, st.st_size);
+    if (read(fd, data, st.st_size) == -1) {
+        close(fd);
+        return false;
+    }
+
     close(fd);
 
     // write special config file to end
@@ -582,6 +607,7 @@ char *GetCommandLine()
 //--------------------------------------------------------------------
 bool writeFieldSizes(char *fieldSizesStr)
 {
+    bool ret = false;
     unlink(SYSMON_FIELDSIZES_FILE);
 
     if (fieldSizesStr == NULL) {
@@ -595,10 +621,13 @@ bool writeFieldSizes(char *fieldSizesStr)
     if (fd < 0)
         return false;
 
-    write(fd, fieldSizesStr, strlen(fieldSizesStr) + 1);
+    if (write(fd, fieldSizesStr, strlen(fieldSizesStr) + 1) != -1) {
+        ret = true;
+    }
+
     close(fd);
 
-    return true;
+    return ret;
 }
 
 //--------------------------------------------------------------------
@@ -633,7 +662,12 @@ char *readFieldSizes()
         return NULL;
     }
 
-    read(fd, data, st.st_size);
+    if (read(fd, data, st.st_size) == -1) {
+        close(fd);
+        free(data);
+        return NULL;
+    }
+
     close(fd);
 
     return data;
@@ -685,10 +719,16 @@ bool setRunState(unsigned int runState, bool running)
 bool stopSysmonService()
 {
     if (fileExists(SYSTEMD_DIR "/" SYSTEMD_SERVICE)) {
-        system(SYSTEMD_STOP_CMD " " SYSTEMD_SERVICE);
+        if (system(SYSTEMD_STOP_CMD " " SYSTEMD_SERVICE) == -1) {
+            return false;
+        }
+
         return true;
     } else if (fileExists(INITD_DIR "/" INITD_SERVICE)) {
-        system(INITD_DIR "/" INITD_SERVICE " stop");
+        if (system(INITD_DIR "/" INITD_SERVICE " stop") == -1) {
+            return false;
+        }
+
         return true;
     }
     return false;

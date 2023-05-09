@@ -230,6 +230,7 @@ TEST( Process, ProcessName )
             // expand cmdline string into array of strings
             numspaces = 0;
             cmdline_copy = strdup(test.cmdline);
+            EXPECT_NE(cmdline_copy, nullptr);
             ptr = cmdline_copy;
             while ((ptr = strchr(ptr, ' ')) != NULL) {
                 numspaces++;
@@ -252,7 +253,19 @@ TEST( Process, ProcessName )
         }
 
         child = fork();
-        ASSERT_TRUE(child >= 0);
+
+        // We are not using the GTEST ASSERT_* here as the static analysis seems to think that
+        // its possible to have a memory leak. We explicitly check the value and free memory
+        // that the analyzer is complaining about and then ASSERT.
+        if (child < 0)
+        {
+            free(cmdline);
+            free(cmdline_copy);
+            cmdline = NULL;
+            cmdline_copy = NULL;
+            ASSERT_TRUE(false);
+        }
+
         if (child == 0) {
             execve( test.exe, (char* const*)cmdline, NULL );
         }
@@ -262,9 +275,12 @@ TEST( Process, ProcessName )
         EXPECT_EQ( strcmp( pName, test.match ), 0 );
 
         kill( child, 9 );
+
         if (cmdline != NULL) {
-            free(cmdline_copy);
             free(cmdline);
+        }
+        if (cmdline_copy != NULL) {
+            free(cmdline_copy);
         }
     }
 }
@@ -283,7 +299,10 @@ ULONG fetchSessionId( pid_t ProcessId )
         return -1;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     fscanf( fp, "%d", &sessionId );
+#pragma GCC diagnostic pop
     fclose( fp );
 
     return sessionId;
@@ -377,6 +396,7 @@ TEST( Process, GetProcess )
             // expand cmdline string into array of strings
             numspaces = 0;
             cmdline_copy = strdup(test.cmdline);
+            EXPECT_NE(cmdline_copy, nullptr);
             ptr = cmdline_copy;
             while ((ptr = strchr(ptr, ' ')) != NULL) {
                 numspaces++;
@@ -402,12 +422,29 @@ TEST( Process, GetProcess )
         mkdir(test.exepath, 0777);
         snprintf(exepath, PATH_MAX, "%s/mysleep", test.exepath);
         snprintf(systemCmd, PATH_MAX * 2, "cp mysleep %s", exepath);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
         system(systemCmd);
+#pragma GCC diagnostic pop
 
         child = fork();
-        ASSERT_TRUE(child >= 0);
+
+        // We are not using the GTEST ASSERT_* here as the static analysis seems to think that
+        // its possible to have a memory leak. We explicitly check the value and free memory
+        // that the analyzer is complaining about and then ASSERT.
+        if (child < 0)
+        {
+            free(cmdline);
+            cmdline = NULL;
+            ASSERT_TRUE(false);
+        }
+
         if (child == 0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
             chdir(test.cwd);
+#pragma GCC diagnostic pop
             execve( exepath, cmdline, NULL );
         }
 
@@ -625,7 +662,7 @@ TEST( Process, GetLogonTime )
         ptr = strchr( ptr, ' ' );
         ASSERT_NE( ptr, nullptr );
         ptr++;
- 
+
         while (*ptr == ' ') {
             ptr++;
         }
@@ -731,6 +768,7 @@ TEST( Events, DispatchEvent )
     ULONG eventSize = 0;
     size_t len = 0;
     int eventIdFd = 0;
+    const char* im = "/foo/bar/image";
 
 	*FakeSyslog = 0x00;
 
@@ -750,7 +788,10 @@ TEST( Events, DispatchEvent )
     ASSERT_EQ(ApplyConfigurationFile(const_cast<PTCHAR>(ruleTempFile.c_str()), &Rules, &RulesSize, TRUE), TRUE);
 
     event = (PSYSMON_EVENT_HEADER)malloc(65536);
-    ASSERT_TRUE(event != NULL);
+    if(event==NULL)
+    {
+        ASSERT_TRUE(false);
+    }
     pc = &event->m_EventBody.m_ProcessCreateEvent;
 
     event->m_EventType = ProcessCreate;
@@ -777,7 +818,8 @@ TEST( Events, DispatchEvent )
     eventSize = sizeof(SYSMON_EVENT_HEADER);
 
     ptr = (char*)(pc + 1);
-    strcpy(ptr, "/foo/bar/image");
+    len = strlen(im) + 1;
+    memcpy(ptr, im, len);
     len = strlen(ptr) + 1;
     pc->m_Extensions[PC_ImagePath] = len;
     ptr += len;
@@ -792,7 +834,6 @@ TEST( Events, DispatchEvent )
     strcpy(ptr, "/bar/foo");
     len = strlen(ptr) + 1;
     pc->m_Extensions[PC_CurrentDirectory] = len;
-    ptr += len;
     eventSize += len;
 
     event->m_EventSize = eventSize;
@@ -808,7 +849,17 @@ TEST( Events, DispatchEvent )
     cmdline[3] = NULL;
 
     pid_t pid = fork();
-    ASSERT_TRUE(pid >= 0);
+
+    // We are not using the GTEST ASSERT_* here as the static analysis seems to think that
+    // its possible to have a memory leak. We explicitly check the value and free memory
+    // that the analyzer is complaining about and then ASSERT.
+    if(pid < 0)
+    {
+        free(process);
+        process = NULL;
+        ASSERT_TRUE(false);
+    }
+
     if (pid == 0) {
         execve("./mysleep", cmdline, NULL);
     }
@@ -828,6 +879,8 @@ TEST( Events, DispatchEvent )
     }
     unlink(ruleTempFile.c_str());
     unlink("/tmp/sysmonUnitTest.DispatchEvent");
+
+    free(event);
 }
 
 
