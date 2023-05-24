@@ -61,7 +61,7 @@ sudo dnf install sysmonforlinux
 #### 1. Register Microsoft key and feed
 ```sh
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sudo wget -q -O /etc/yum.repos.d/microsoft-prod.repo https://packages.microsoft.com/config/rhel/9/prod.repo
+sudo wget -q -O /etc/yum.repos.d/microsoft-prod.repo https://packages.microsoft.com/config/rhel/9.0/prod.repo
 ```
 
 #### 2. Install SysmonForLinux
