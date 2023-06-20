@@ -393,7 +393,7 @@ LONGLONG NetworkTracker::UpdateUdpPidAddr(pid_t pid, LONGLONG ctime, const Packe
 void NetworkTracker::PurgeUdp(LONGLONG curTime)
 {
     LONGLONG lastTime = 0;
-    pid_t pid;
+    pid_t pid = 0;
     int fd;
 
     // traverse all PID/FD entries chronologically
@@ -502,7 +502,6 @@ bool NetworkTracker::InodeToAddr(PacketAddresses *p, bool IPv4, uint64_t inodeIn
     FILE *fp = NULL;
     char *line = NULL;
     size_t len = 0;
-    ssize_t readLen;
     int numTokens = 0;
     char lAddrText[33];
     char rAddrText[33];
@@ -523,9 +522,12 @@ bool NetworkTracker::InodeToAddr(PacketAddresses *p, bool IPv4, uint64_t inodeIn
     if (fp == NULL)
         return false;
 
-    readLen = getline(&line, &len, fp); // skip first line
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+    getline(&line, &len, fp); // skip first line
+#pragma GCC diagnostic pop
 
-    while ((readLen = getline(&line, &len, fp)) >= 0) {
+    while ((getline(&line, &len, fp)) >= 0) {
         numTokens = sscanf(line, "%u: %32[0-9A-Fa-f]:%hX %32[0-9A-Fa-f]:%hX %X %lX:%lX %X:%lX %lX %u %u %lu %*s\n",
                 &sl, lAddrText, &p->localPort, rAddrText, &p->remotePort, &st, &txQueue, &rxQueue, &tr, &tmWhen,
                 &retrnsmt, &uid, &timeout, &inode);
@@ -643,7 +645,7 @@ bool NetworkTracker::SeenUdp(PacketAddresses *p, pid_t pid, int fd)
     LONGLONG lastTime;
     uint64_t pidFd = ((uint64_t)pid << 32) | fd;
 
-    GetSystemTimeAsLargeInteger(&curTime);    
+    GetSystemTimeAsLargeInteger(&curTime);
 
     if (!GetUdp(p, pid, fd)) {
         // failed to look up in /proc
@@ -729,7 +731,7 @@ bool NetworkTracker::SeenUdp(const PacketAddresses *p, pid_t pid)
     memcpy(pa.srcAddr, p->localAddr, sizeof(pa.srcAddr));
     memcpy(pa.dstAddr, p->remoteAddr, sizeof(pa.dstAddr));
 
-    GetSystemTimeAsLargeInteger(&curTime);    
+    GetSystemTimeAsLargeInteger(&curTime);
 
     // get the most recent sent time from the kernel
     if (telemetryMapLookupElem(mapFds[UDP_ADDRS_HASH], &pa, &lastTime) < 0) {

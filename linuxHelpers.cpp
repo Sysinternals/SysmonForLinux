@@ -283,17 +283,28 @@ BOOLEAN GetProcess(
     *(uint64_t *)ptr = uid;
     ptr += sizeof(uint64_t);
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+// When using snprintf, the below fields get written past the end of the sysmon event struct memory region.
+// As such, source fortification (in)correctly flags the size of 'ptr' as being 0 and it fails with a buffer
+// overflow. We work around this by using memcpy instead.
     if (imagePathLen > 0) {
-        snprintf( ptr, imagePathLen, "%s", imagePath );
+        //snprintf( ptr, Len, "%s", imagePath );
+        memcpy(ptr, imagePath, sizeof(ptr) * imagePathLen);
         ptr += imagePathLen;
     }
     if (cmdlineLen > 0) {
-        snprintf( ptr, cmdlineLen, "%s", cmdline );
+        //snprintf( ptr, cmdlineLen, "%s", cmdline );
+        memcpy(ptr, cmdline, sizeof(ptr) * cmdlineLen);
         ptr += cmdlineLen;
     }
     if (cwdLen > 0) {
-        snprintf( ptr, cwdLen, "%s", cwd );
+        //snprintf( ptr, cwdLen, "%s", cwd );
+        memcpy(ptr, cwd, sizeof(ptr) * cwdLen);
     }
+ #pragma GCC diagnostic pop
 
     return true;
 }
@@ -314,7 +325,11 @@ void SetBootTime()
 
     fp = fopen( "/proc/uptime", "r" );
     if (fp != NULL) {
-        fscanf(fp, "%lf", &uptimeF);
+        if(fscanf(fp, "%lf", &uptimeF) == EOF) {
+            fclose(fp);
+            return;
+        }
+
         gettimeofday(&tv, NULL);
 
         g_bootSecSinceEpoch = (double)tv.tv_sec + ((double)tv.tv_usec / (1000 * 1000)) - uptimeF;
@@ -428,7 +443,11 @@ BOOLEAN GetProcessInfo(
     fp = fopen(statFile, "r");
     *Sessionid = -1;
     if (fp != NULL) {
-        fscanf(fp, "%d", Sessionid);
+        if(fscanf(fp, "%d", Sessionid) == EOF) {
+            fclose(fp);
+            return FALSE;
+        }
+
         fclose(fp);
     }
 
