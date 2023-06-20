@@ -882,29 +882,20 @@ VOID LargeIntegerToSystemTimeString(
 // Calculates image hash.
 //
 //--------------------------------------------------------------------
-void LinuxGetFileHash(PTCHAR imagePath, char *stringBuffer, size_t stringBufferSize)
+void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, size_t stringBufferSize)
 {
-    unsigned int        hashType;
     unsigned char       tmpReadBuffer[4096] = {};
     unsigned char       tmpHashBuffer[ALGO_MAX][256] = {};
     unsigned char       tmpHashPrefixBuffer[16] = {};
     unsigned char       tmpStringBuffer[256] = {};
     char                hashSeparator[] = ",";
     char                hashPrefix[3][8] = {"SHA1=", "MD5=", "SHA256="};
-    unsigned int        hashSize[ALGO_MAX];
+    unsigned int        hashSize[ALGO_MAX] = {};
     unsigned int        hashFlag[ALGO_MAX] = {};
     size_t              n;
     FILE                *filePtr;
-    EVP_MD_CTX          *sha1_ctx, *md5_ctx, *sha256_ctx;	
-
-    // Get configured hash flag
-    if(OPT_SET( HashAlgorithms )){
-        hashType = *((unsigned int *)OPT_VALUE( HashAlgorithms ));
-    }
-    else{
-        hashType = ALGO_SHA256;
-    }
-
+    EVP_MD_CTX          *sha1_ctx, *md5_ctx, *sha256_ctx;
+    
     // Allocate digests context
     sha1_ctx    = EVP_MD_CTX_new();
     md5_ctx     = EVP_MD_CTX_new();
@@ -959,7 +950,7 @@ void LinuxGetFileHash(PTCHAR imagePath, char *stringBuffer, size_t stringBufferS
 
     memset(tmpStringBuffer, 0, sizeof(tmpStringBuffer));
     memset(tmpHashPrefixBuffer, 0, sizeof(tmpHashPrefixBuffer));
-
+    
     for(unsigned int algo=0;algo<ALGO_MAX;algo++){
         if( hashFlag[algo] ){
 
@@ -988,10 +979,12 @@ void LinuxGetFileHash(PTCHAR imagePath, char *stringBuffer, size_t stringBufferS
             for(unsigned int i=0;i<hashSize[algo];i++){
                 snprintf((char *)tmpStringBuffer+i*2, sizeof(tmpStringBuffer), "%02x", tmpHashBuffer[algo][i]);
             }
-
-            strcat(stringBuffer, (char *)tmpHashPrefixBuffer);
-            strcat(stringBuffer, (char *)tmpStringBuffer);
-
+            
+            if(stringBufferSize > strnlen((char *)tmpHashPrefixBuffer, sizeof(tmpHashPrefixBuffer)) + strnlen((char *)tmpStringBuffer, sizeof(tmpStringBuffer))){
+                strcat(stringBuffer, (char *)tmpHashPrefixBuffer);
+                strcat(stringBuffer, (char *)tmpStringBuffer);
+            }
+            
             if( !(hashType & ALGO_MULTIPLE) ) return;
         }
     }
