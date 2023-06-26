@@ -581,7 +581,8 @@ void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_CreateTime.QuadPart = event->m_CreateTime.QuadPart;
     
     if(OPT_SET( HashAlgorithms )){
-        newEvent->m_HashType = *((unsigned int *)OPT_VALUE( HashAlgorithms ));
+        unsigned int *hashTypePtr = OPT_VALUE( HashAlgorithms );
+        newEvent->m_HashType = *hashTypePtr;
     }
     else{
         newEvent->m_HashType = 0;
