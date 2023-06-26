@@ -553,7 +553,7 @@ void processProcessAccess(CONST PSYSMON_EVENT_HEADER eventHdr)
 void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
 {
     if(eventHdr == NULL) {
-        fprintf(stderr, "processFileCreate invalid params\n");
+        fprintf(stderr, "processProcessCreate invalid params\n");
         return;
     }
 
@@ -617,6 +617,73 @@ void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
 
 //--------------------------------------------------------------------
 //
+// processFileDelete
+//
+// Handles file delete events
+//
+//--------------------------------------------------------------------
+void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
+{
+    if(eventHdr == NULL) {
+        fprintf(stderr, "processFileDelete invalid params\n");
+        return;
+    }
+
+    char newData[65536];
+
+    PSYSMON_EVENT_HEADER newEventHdr = (PSYSMON_EVENT_HEADER)newData;
+    newEventHdr->m_FieldFiltered = 0;
+    newEventHdr->m_PreFiltered = 0;
+    newEventHdr->m_SequenceNumber = 0;
+    newEventHdr->m_SessionId = 0;
+    
+    PSYSMON_FILE_DELETE event = (PSYSMON_FILE_DELETE)&(eventHdr->m_EventBody);
+
+    newEventHdr->m_EventType = FileDelete;
+    PSYSMON_FILE_DELETE newEvent = &newEventHdr->m_EventBody.m_FileDeleteEvent;
+    newEvent->m_ProcessId = event->m_ProcessId;
+    newEvent->m_DeleteTime.QuadPart = event->m_DeleteTime.QuadPart;
+    newEvent->m_IsExecutable = event->m_IsExecutable;
+    newEvent->m_Archived[0] = event->m_Archived[0];
+    newEvent->m_TrackerId = event->m_TrackerId;
+    
+    if(OPT_SET( HashAlgorithms )){
+        newEvent->m_HashType = *((unsigned int *)OPT_VALUE( HashAlgorithms ));
+    }
+    else{
+        newEvent->m_HashType = 0;
+    }
+
+    memset(newEvent->m_Extensions, 0, sizeof(newEvent->m_Extensions));
+    const char *ptr = (char *)(event + 1);
+    char *newPtr = (char *)(newEvent + 1);
+
+    memcpy(newPtr, ptr, event->m_Extensions[FD_Sid]);
+    newEvent->m_Extensions[FD_Sid] = event->m_Extensions[FD_Sid];
+    ptr += event->m_Extensions[FD_Sid];
+    newPtr += event->m_Extensions[FD_Sid];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_FileName]);
+    newEvent->m_Extensions[FD_FileName] = event->m_Extensions[FD_FileName];
+    ptr += event->m_Extensions[FD_FileName];
+    newPtr += event->m_Extensions[FD_FileName];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_ImagePath]);
+    newEvent->m_Extensions[FD_ImagePath] = event->m_Extensions[FD_ImagePath];
+    ptr += event->m_Extensions[FD_ImagePath];
+    newPtr += event->m_Extensions[FD_ImagePath];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_Hash]);
+    newEvent->m_Extensions[FD_Hash] = event->m_Extensions[FD_Hash];
+    newPtr += event->m_Extensions[FD_Hash];
+
+    newEventHdr->m_EventSize = (uint32_t)((void *)newPtr - (void *)newEventHdr);
+
+    DispatchEvent(newEventHdr);
+}
+
+//--------------------------------------------------------------------
+//
 // handleEvent
 //
 // Receives the eBPF telemetry and sends it to DispatchEvent().
@@ -636,6 +703,9 @@ static void handleEvent(void *ctx, int cpu, void *data, uint32_t size)
     switch ((DWORD)eventHdr->m_EventType) {
         case LinuxFileOpen:
             processFileOpen(eventHdr);
+            break;
+        case FileDelete:
+            processFileDelete(eventHdr);
             break;
         case LinuxNetworkEvent:
             processNetworkEvent(eventHdr);
