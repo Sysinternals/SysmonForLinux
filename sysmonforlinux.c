@@ -647,12 +647,7 @@ void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_Archived[0] = event->m_Archived[0];
     newEvent->m_TrackerId = event->m_TrackerId;
     
-    if(OPT_SET( HashAlgorithms )){
-        newEvent->m_HashType = *((unsigned int *)OPT_VALUE( HashAlgorithms ));
-    }
-    else{
-        newEvent->m_HashType = 0;
-    }
+    newEvent->m_HashType = 0xFF; // 0xFF will not be interpreted as any ALGO_*. Therefore, Hashes field will always be blank.
 
     memset(newEvent->m_Extensions, 0, sizeof(newEvent->m_Extensions));
     const char *ptr = (char *)(event + 1);
