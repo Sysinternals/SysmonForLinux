@@ -94,6 +94,11 @@ set(CMAKE_CXX_FLAGS "-std=gnu++17")
 find_package(LibXml2 2.0.0 REQUIRED)
 
 #
+# rely on openssl having been installed
+#
+find_package(OpenSSL REQUIRED)
+
+#
 # source directories
 #
 if(SYSMON_ADO)
@@ -329,7 +334,7 @@ set(EBPF_DEPENDS
 #
 # link sysmon
 #
-target_link_libraries(sysmon sysinternalsEBPF "${LIBXML2_LIBRARIES}" pthread)
+target_link_libraries(sysmon sysinternalsEBPF "${LIBXML2_LIBRARIES}" pthread OpenSSL::Crypto)
 
 
 #
@@ -398,7 +403,7 @@ add_executable(sysmonUnitTests
                "${PROJECT_BINARY_DIR}/yoursleep"
                )
 
-target_link_libraries(sysmonUnitTests "${LIBXML2_LIBRARIES}" ${GTEST_LIBRARIES} pthread)
+target_link_libraries(sysmonUnitTests "${LIBXML2_LIBRARIES}" ${GTEST_LIBRARIES} pthread OpenSSL::Crypto)
 target_include_directories(sysmonUnitTests PUBLIC
                            "${CMAKE_SOURCE_DIR}"
                            "${SYSMON_COMMON_SOURCE_DIR}"

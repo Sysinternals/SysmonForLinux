@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <pthread.h>
 #include <sys/syscall.h>
+#include <openssl/evp.h>
 
 //--------------------------------------------------------------------
 //
@@ -871,6 +872,121 @@ VOID LargeIntegerToSystemTimeString(
 
         snprintf( s, sLen, "Incorrect filetime: 0x%" PRIx64,
                      timestamp->QuadPart );
+    }
+}
+
+//--------------------------------------------------------------------
+//
+// LinuxGetFileHash
+//
+// Calculates image hash.
+//
+//--------------------------------------------------------------------
+void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, size_t stringBufferSize)
+{
+    unsigned char       tmpReadBuffer[4096] = {};
+    unsigned char       tmpHashBuffer[ALGO_MAX][256] = {};
+    unsigned char       tmpHashPrefixBuffer[16] = {};
+    unsigned char       tmpStringBuffer[256] = {};
+    char                hashSeparator[] = ",";
+    char                hashPrefix[3][8] = {"SHA1=", "MD5=", "SHA256="};
+    unsigned int        hashSize[ALGO_MAX] = {};
+    unsigned int        hashFlag[ALGO_MAX] = {};
+    size_t              n;
+    FILE                *filePtr;
+    EVP_MD_CTX          *sha1_ctx, *md5_ctx, *sha256_ctx;
+    
+    // Allocate digests context
+    sha1_ctx    = EVP_MD_CTX_new();
+    md5_ctx     = EVP_MD_CTX_new();
+    sha256_ctx  = EVP_MD_CTX_new();
+    if ( !sha1_ctx || !md5_ctx || !sha256_ctx ) return;
+
+    EVP_DigestInit(sha1_ctx  , EVP_sha1());
+    EVP_DigestInit(md5_ctx   , EVP_md5());
+    EVP_DigestInit(sha256_ctx, EVP_sha256());
+
+    hashFlag[ALGO_SHA1] = (((hashType>>(ALGO_SHA1-1))&1) && (hashType & ALGO_MULTIPLE)) || (hashType == ALGO_SHA1);
+    hashFlag[ALGO_MD5] = (((hashType>>(ALGO_MD5-1))&1) && (hashType & ALGO_MULTIPLE)) || (hashType == ALGO_MD5);
+    hashFlag[ALGO_SHA256] = (((hashType>>(ALGO_SHA256-1))&1) && (hashType & ALGO_MULTIPLE)) || (hashType == ALGO_SHA256);
+
+    filePtr = fopen(imagePath, "rb");
+    if( !filePtr ) return;
+
+    // Read and hash image
+    while((n = fread(tmpReadBuffer, 1, sizeof(tmpReadBuffer), filePtr))){
+
+        if( hashFlag[ALGO_SHA1] ){
+            if (!EVP_DigestUpdate(sha1_ctx, tmpReadBuffer, n)){
+                fclose(filePtr);
+                return;
+            }
+            if ( !(hashType & ALGO_MULTIPLE) ) continue;
+        }
+
+        if( hashFlag[ALGO_MD5] ){
+            if (!EVP_DigestUpdate(md5_ctx, tmpReadBuffer, n)){
+                fclose(filePtr);
+                return;
+            }
+            if ( !(hashType & ALGO_MULTIPLE) ) continue;
+        }
+
+        if( hashFlag[ALGO_SHA256] ){
+            if (!EVP_DigestUpdate(sha256_ctx, tmpReadBuffer, n)){
+                fclose(filePtr);
+                return;
+            }
+            if ( !(hashType & ALGO_MULTIPLE) ) continue;
+        }
+
+    }
+    fclose(filePtr);
+
+    // Retrieve digest and cleanup
+    EVP_DigestFinal(sha1_ctx  , tmpHashBuffer[ALGO_SHA1]  , &hashSize[ALGO_SHA1]);
+    EVP_DigestFinal(md5_ctx   , tmpHashBuffer[ALGO_MD5]   , &hashSize[ALGO_MD5]);
+    EVP_DigestFinal(sha256_ctx, tmpHashBuffer[ALGO_SHA256], &hashSize[ALGO_SHA256]);
+
+    memset(tmpStringBuffer, 0, sizeof(tmpStringBuffer));
+    memset(tmpHashPrefixBuffer, 0, sizeof(tmpHashPrefixBuffer));
+    
+    for(unsigned int algo=0;algo<ALGO_MAX;algo++){
+        if( hashFlag[algo] ){
+
+            // Add seperator if multiple hashes
+            if( *tmpStringBuffer ){
+                memset(tmpStringBuffer, 0, sizeof(tmpStringBuffer));
+                memset(tmpHashPrefixBuffer, 0, sizeof(tmpHashPrefixBuffer));
+                
+                strcat((char *)tmpHashPrefixBuffer, hashSeparator);
+            }
+
+            // Add hash prefix "SHA1=", "MD5=" or "SHA256="
+            switch(algo){
+                case ALGO_SHA1:
+                    strcat((char *)tmpHashPrefixBuffer, hashPrefix[ALGO_SHA1-1]);
+                    break;
+                case ALGO_MD5:
+                    strcat((char *)tmpHashPrefixBuffer, hashPrefix[ALGO_MD5-1]);
+                    break;
+                case ALGO_SHA256:
+                    strcat((char *)tmpHashPrefixBuffer, hashPrefix[ALGO_SHA256-1]);
+                    break;
+            }
+
+            // Digest to hex
+            for(unsigned int i=0;i<hashSize[algo];i++){
+                snprintf((char *)tmpStringBuffer+i*2, sizeof(tmpStringBuffer), "%02x", tmpHashBuffer[algo][i]);
+            }
+            
+            if(stringBufferSize > strnlen((char *)tmpHashPrefixBuffer, sizeof(tmpHashPrefixBuffer)) + strnlen((char *)tmpStringBuffer, sizeof(tmpStringBuffer))){
+                strcat(stringBuffer, (char *)tmpHashPrefixBuffer);
+                strcat(stringBuffer, (char *)tmpStringBuffer);
+            }
+            
+            if( !(hashType & ALGO_MULTIPLE) ) return;
+        }
     }
 }
 

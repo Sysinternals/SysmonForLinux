@@ -545,6 +545,141 @@ void processProcessAccess(CONST PSYSMON_EVENT_HEADER eventHdr)
 
 //--------------------------------------------------------------------
 //
+// processProcessCreate
+//
+// Handles process create events
+//
+//--------------------------------------------------------------------
+void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
+{
+    if(eventHdr == NULL) {
+        fprintf(stderr, "processProcessCreate invalid params\n");
+        return;
+    }
+
+    char newData[65536];
+
+    PSYSMON_EVENT_HEADER newEventHdr = (PSYSMON_EVENT_HEADER)newData;
+    newEventHdr->m_FieldFiltered = 0;
+    newEventHdr->m_PreFiltered = 0;
+    newEventHdr->m_SequenceNumber = 0;
+    newEventHdr->m_SessionId = 0;
+    
+    PSYSMON_PROCESS_CREATE event = (PSYSMON_PROCESS_CREATE)&(eventHdr->m_EventBody);
+
+    newEventHdr->m_EventType = ProcessCreate;
+    PSYSMON_PROCESS_CREATE newEvent = &newEventHdr->m_EventBody.m_ProcessCreateEvent;
+    newEvent->m_ProcessId = event->m_ProcessId;
+    newEvent->m_ProcessObject = event->m_ProcessObject;
+    newEvent->m_ParentProcessObject = event->m_ParentProcessObject;
+    newEvent->m_ParentProcessId = event->m_ParentProcessId;
+    newEvent->m_AuditUserId = event->m_AuditUserId;
+    newEvent->m_SessionId = event->m_SessionId;
+    newEvent->m_AuthenticationId.LowPart = event->m_AuthenticationId.LowPart;
+    newEvent->m_AuthenticationId.HighPart = event->m_AuthenticationId.HighPart;
+    newEvent->m_ProcessKey = event->m_ProcessKey;
+    newEvent->m_CreateTime.QuadPart = event->m_CreateTime.QuadPart;
+    
+    if(OPT_SET( HashAlgorithms )){
+        unsigned int *hashTypePtr = OPT_VALUE( HashAlgorithms );
+        newEvent->m_HashType = *hashTypePtr;
+    }
+    else{
+        newEvent->m_HashType = 0;
+    }
+
+    memset(newEvent->m_Extensions, 0, sizeof(newEvent->m_Extensions));
+    const char *ptr = (char *)(event + 1);
+    char *newPtr = (char *)(newEvent + 1);
+
+    memcpy(newPtr, ptr, event->m_Extensions[PC_Sid]);
+    newEvent->m_Extensions[PC_Sid] = event->m_Extensions[PC_Sid];
+    ptr += event->m_Extensions[PC_Sid];
+    newPtr += event->m_Extensions[PC_Sid];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[PC_ImagePath]);
+    newEvent->m_Extensions[PC_ImagePath] = event->m_Extensions[PC_ImagePath];
+    ptr += event->m_Extensions[PC_ImagePath];
+    newPtr += event->m_Extensions[PC_ImagePath];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[PC_CommandLine]);
+    newEvent->m_Extensions[PC_CommandLine] = event->m_Extensions[PC_CommandLine];
+    ptr += event->m_Extensions[PC_CommandLine];
+    newPtr += event->m_Extensions[PC_CommandLine];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[PC_CurrentDirectory]);
+    newEvent->m_Extensions[PC_CurrentDirectory] = event->m_Extensions[PC_CurrentDirectory];
+    newPtr += event->m_Extensions[PC_CurrentDirectory];
+
+    newEventHdr->m_EventSize = (uint32_t)((void *)newPtr - (void *)newEventHdr);
+
+    DispatchEvent(newEventHdr);
+}
+
+//--------------------------------------------------------------------
+//
+// processFileDelete
+//
+// Handles file delete events
+//
+//--------------------------------------------------------------------
+void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
+{
+    if(eventHdr == NULL) {
+        fprintf(stderr, "processFileDelete invalid params\n");
+        return;
+    }
+
+    char newData[65536];
+
+    PSYSMON_EVENT_HEADER newEventHdr = (PSYSMON_EVENT_HEADER)newData;
+    newEventHdr->m_FieldFiltered = 0;
+    newEventHdr->m_PreFiltered = 0;
+    newEventHdr->m_SequenceNumber = 0;
+    newEventHdr->m_SessionId = 0;
+    
+    PSYSMON_FILE_DELETE event = (PSYSMON_FILE_DELETE)&(eventHdr->m_EventBody);
+
+    newEventHdr->m_EventType = FileDelete;
+    PSYSMON_FILE_DELETE newEvent = &newEventHdr->m_EventBody.m_FileDeleteEvent;
+    newEvent->m_ProcessId = event->m_ProcessId;
+    newEvent->m_DeleteTime.QuadPart = event->m_DeleteTime.QuadPart;
+    newEvent->m_IsExecutable = event->m_IsExecutable;
+    newEvent->m_Archived[0] = event->m_Archived[0];
+    newEvent->m_TrackerId = event->m_TrackerId;
+    
+    newEvent->m_HashType = 0xFF; // 0xFF will not be interpreted as any ALGO_*. Therefore, Hashes field will always be blank.
+
+    memset(newEvent->m_Extensions, 0, sizeof(newEvent->m_Extensions));
+    const char *ptr = (char *)(event + 1);
+    char *newPtr = (char *)(newEvent + 1);
+
+    memcpy(newPtr, ptr, event->m_Extensions[FD_Sid]);
+    newEvent->m_Extensions[FD_Sid] = event->m_Extensions[FD_Sid];
+    ptr += event->m_Extensions[FD_Sid];
+    newPtr += event->m_Extensions[FD_Sid];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_FileName]);
+    newEvent->m_Extensions[FD_FileName] = event->m_Extensions[FD_FileName];
+    ptr += event->m_Extensions[FD_FileName];
+    newPtr += event->m_Extensions[FD_FileName];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_ImagePath]);
+    newEvent->m_Extensions[FD_ImagePath] = event->m_Extensions[FD_ImagePath];
+    ptr += event->m_Extensions[FD_ImagePath];
+    newPtr += event->m_Extensions[FD_ImagePath];
+    
+    memcpy(newPtr, ptr, event->m_Extensions[FD_Hash]);
+    newEvent->m_Extensions[FD_Hash] = event->m_Extensions[FD_Hash];
+    newPtr += event->m_Extensions[FD_Hash];
+
+    newEventHdr->m_EventSize = (uint32_t)((void *)newPtr - (void *)newEventHdr);
+
+    DispatchEvent(newEventHdr);
+}
+
+//--------------------------------------------------------------------
+//
 // handleEvent
 //
 // Receives the eBPF telemetry and sends it to DispatchEvent().
@@ -565,11 +700,17 @@ static void handleEvent(void *ctx, int cpu, void *data, uint32_t size)
         case LinuxFileOpen:
             processFileOpen(eventHdr);
             break;
+        case FileDelete:
+            processFileDelete(eventHdr);
+            break;
         case LinuxNetworkEvent:
             processNetworkEvent(eventHdr);
             break;
         case ProcessAccess:
             processProcessAccess(eventHdr);
+            break;
+        case ProcessCreate:
+            processProcessCreate(eventHdr);
             break;
         case ProcessTerminate:
         {
