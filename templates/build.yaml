@@ -6,6 +6,12 @@ parameters:
 steps:
 - script: |
     cd ${{ parameters.srcFolder }}
+    # -------------------------- TEMP DIAG START  ----------------------------------------------------
+    if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
+      echo "Diag script and dotnet-stack found, running in background"
+      ./diag_script.sh&
+    fi
+    # -------------------------- TEMP DIAG END ----------------------------------------------------
     mkdir build && cd build
     cmake ..
     make
@@ -13,6 +19,12 @@ steps:
 
 - script: |
     cd ${{ parameters.srcFolder }}
+    # -------------------------- TEMP DIAG START ----------------------------------------------------
+    if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
+      echo "Diag script and dotnet-stack found, running in background"
+      ./diag_script.sh&
+    fi
+    # -------------------------- TEMP DIAG END ----------------------------------------------------
     rm -rf build && mkdir build && cd build
     scan-build cmake ..
     scan-build -v --status-bugs -o verifier_result --exclude ../test -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
