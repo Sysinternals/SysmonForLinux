@@ -9,7 +9,7 @@ do
     if pgrep -x "$process_name" > /dev/null; then
         echo "Process $process_name is running. Dumping stacks..."
         process_id=$(pgrep -x "$process_name")
-        dotnet-stack report -p "$process_id"
+        $HOME/.dotnet/tools/dotnet-stack report -p "$process_id"
         echo "Stacks dumped"
     fi
 
