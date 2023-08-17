@@ -1003,8 +1003,8 @@ bool setConfigFromStoredArgv(
 
     //
     // Parse the command line using the data from manifest.xml.
-    // Note that we pass Transform=FALSE to make sure we keep the casing
-    // of the rules the same.
+    // Note that the casing of the rules are the same as specified
+    // in the configuration.
     //
     if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
             &parsedConfigFile, configHash, _countof( configHash ) ) ) {
@@ -1056,8 +1056,9 @@ bool setConfigFromStoredArgv(
     // of rules, only this time, make sure we pass Transform=TRUE so
     // that the rules get lower cased which is a requirement for case
     // insensitivity to take place. We can't simply use the old 'rules'
-    // since the rules engine holds a reference to them and will end up
-    // freeing it. Instead we make a copy of the rules.
+    // since the rules engine holds a reference (set as a result of calling
+    // ParseCommandLine above) and will end up freeing it. Instead we make a
+    // copy of the rules.
     //
     PVOID rulesCopy = malloc(rulesSize);
     if(rulesCopy == NULL)
@@ -1081,6 +1082,7 @@ bool setConfigFromStoredArgv(
         // argv is static to preserve used memory
         //
         argv = NULL;
+        free(rulesCopy);
         return false;
     }
 
