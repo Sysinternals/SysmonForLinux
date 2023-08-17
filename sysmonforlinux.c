@@ -1007,7 +1007,7 @@ bool setConfigFromStoredArgv(
     // of the rules the same.
     //
     if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
-            &parsedConfigFile, configHash, _countof( configHash ), FALSE ) ) {
+            &parsedConfigFile, configHash, _countof( configHash ) ) ) {
         fprintf( stderr, "Could not parse new rules(keep case)\n" );
         free( argv );
         //
@@ -1222,7 +1222,7 @@ main(
 	// Parse the command line using the data from manifest.xml
 	//
 	if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
-					&configFile, configHash, _countof( configHash), FALSE ) ) {
+					&configFile, configHash, _countof( configHash) ) ) {
 
 		return Usage( argv[0], &csbi );
 	}
