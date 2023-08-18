@@ -564,7 +564,7 @@ void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEventHdr->m_PreFiltered = 0;
     newEventHdr->m_SequenceNumber = 0;
     newEventHdr->m_SessionId = 0;
-    
+
     PSYSMON_PROCESS_CREATE event = (PSYSMON_PROCESS_CREATE)&(eventHdr->m_EventBody);
 
     newEventHdr->m_EventType = ProcessCreate;
@@ -579,7 +579,7 @@ void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_AuthenticationId.HighPart = event->m_AuthenticationId.HighPart;
     newEvent->m_ProcessKey = event->m_ProcessKey;
     newEvent->m_CreateTime.QuadPart = event->m_CreateTime.QuadPart;
-    
+
     if(OPT_SET( HashAlgorithms )){
         unsigned int *hashTypePtr = OPT_VALUE( HashAlgorithms );
         newEvent->m_HashType = *hashTypePtr;
@@ -596,17 +596,17 @@ void processProcessCreate(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_Extensions[PC_Sid] = event->m_Extensions[PC_Sid];
     ptr += event->m_Extensions[PC_Sid];
     newPtr += event->m_Extensions[PC_Sid];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[PC_ImagePath]);
     newEvent->m_Extensions[PC_ImagePath] = event->m_Extensions[PC_ImagePath];
     ptr += event->m_Extensions[PC_ImagePath];
     newPtr += event->m_Extensions[PC_ImagePath];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[PC_CommandLine]);
     newEvent->m_Extensions[PC_CommandLine] = event->m_Extensions[PC_CommandLine];
     ptr += event->m_Extensions[PC_CommandLine];
     newPtr += event->m_Extensions[PC_CommandLine];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[PC_CurrentDirectory]);
     newEvent->m_Extensions[PC_CurrentDirectory] = event->m_Extensions[PC_CurrentDirectory];
     newPtr += event->m_Extensions[PC_CurrentDirectory];
@@ -637,7 +637,7 @@ void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEventHdr->m_PreFiltered = 0;
     newEventHdr->m_SequenceNumber = 0;
     newEventHdr->m_SessionId = 0;
-    
+
     PSYSMON_FILE_DELETE event = (PSYSMON_FILE_DELETE)&(eventHdr->m_EventBody);
 
     newEventHdr->m_EventType = FileDelete;
@@ -647,7 +647,7 @@ void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_IsExecutable = event->m_IsExecutable;
     newEvent->m_Archived[0] = event->m_Archived[0];
     newEvent->m_TrackerId = event->m_TrackerId;
-    
+
     newEvent->m_HashType = 0xFF; // 0xFF will not be interpreted as any ALGO_*. Therefore, Hashes field will always be blank.
 
     memset(newEvent->m_Extensions, 0, sizeof(newEvent->m_Extensions));
@@ -658,17 +658,17 @@ void processFileDelete(CONST PSYSMON_EVENT_HEADER eventHdr)
     newEvent->m_Extensions[FD_Sid] = event->m_Extensions[FD_Sid];
     ptr += event->m_Extensions[FD_Sid];
     newPtr += event->m_Extensions[FD_Sid];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[FD_FileName]);
     newEvent->m_Extensions[FD_FileName] = event->m_Extensions[FD_FileName];
     ptr += event->m_Extensions[FD_FileName];
     newPtr += event->m_Extensions[FD_FileName];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[FD_ImagePath]);
     newEvent->m_Extensions[FD_ImagePath] = event->m_Extensions[FD_ImagePath];
     ptr += event->m_Extensions[FD_ImagePath];
     newPtr += event->m_Extensions[FD_ImagePath];
-    
+
     memcpy(newPtr, ptr, event->m_Extensions[FD_Hash]);
     newEvent->m_Extensions[FD_Hash] = event->m_Extensions[FD_Hash];
     newPtr += event->m_Extensions[FD_Hash];
@@ -1002,11 +1002,13 @@ bool setConfigFromStoredArgv(
     }
 
     //
-    // Parse the command line using the data from manifest.xml
+    // Parse the command line using the data from manifest.xml.
+    // Note that the casing of the rules are the same as specified
+    // in the configuration.
     //
     if( !ParseCommandLine( argc, argv, &rules, &rulesSize,
             &parsedConfigFile, configHash, _countof( configHash ) ) ) {
-        fprintf( stderr, "Could not parse new rules\n" );
+        fprintf( stderr, "Could not parse new rules(keep case)\n" );
         free( argv );
         //
         // argv is static to preserve used memory
@@ -1042,9 +1044,47 @@ bool setConfigFromStoredArgv(
     }
 
     //
-    // Write rules blob to file
+    // Write rules blob to file. We write the rules in the same case as
+    // in the configuration file. This is important to make sure
+    // the case is the same when using the -c switch to dump out the configuration
     //
     WriteRulesBlob( rules, rulesSize );
+
+
+    //
+    // Now we want to reinitialize the rules engine with the same set
+    // of rules, only this time, make sure we pass Transform=TRUE so
+    // that the rules get lower cased which is a requirement for case
+    // insensitivity to take place. We can't simply use the old 'rules'
+    // since the rules engine holds a reference (set as a result of calling
+    // ParseCommandLine above) and will end up freeing it. Instead we make a
+    // copy of the rules.
+    //
+    PVOID rulesCopy = malloc(rulesSize);
+    if(rulesCopy == NULL)
+    {
+        fprintf( stderr, "Failed to allocate memory to rulesCopy\n" );
+        free( argv );
+        //
+        // argv is static to preserve used memory
+        //
+        argv = NULL;
+        return false;
+    }
+
+    memcpy(rulesCopy, rules, rulesSize);
+
+    if(!InitializeRules() || !SetRuleBlob(rulesCopy, rulesSize, TRUE))
+    {
+        fprintf( stderr, "Could not set new rules(lower case)\n" );
+        free( argv );
+        //
+        // argv is static to preserve used memory
+        //
+        argv = NULL;
+        free(rulesCopy);
+        return false;
+    }
 
     //
     // Set active rules
