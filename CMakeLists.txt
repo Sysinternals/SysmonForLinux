@@ -94,11 +94,6 @@ set(CMAKE_CXX_FLAGS "-std=gnu++17")
 find_package(LibXml2 2.0.0 REQUIRED)
 
 #
-# rely on openssl having been installed
-#
-find_package(OpenSSL REQUIRED)
-
-#
 # source directories
 #
 if(SYSMON_ADO)
@@ -114,7 +109,7 @@ endif()
 #
 set(SYSMON_COMPRESS_MAN "sysmon.8.gz")
 
-add_custom_target(SYSMON_MAN_COMPRESS ALL
+add_custom_target(sysmonManPageCompress ALL
                   DEPENDS ${PROJECT_BINARY_DIR}/${SYSMON_COMPRESS_MAN}
                   )
 
@@ -123,6 +118,24 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/${SYSMON_COMPRESS_MAN}
                    COMMENT "Compressing Sysmon man page"
                    DEPENDS "${CMAKE_SOURCE_DIR}/package/usr/share/man/man8/sysmon.8"
                   )
+
+include(ExternalProject)
+
+
+# Get and build openSSL.
+# When you update the GIT tag please make sure to delete the build
+# directory before building again.
+ExternalProject_Add(openssl
+                    GIT_REPOSITORY https://github.com/openssl/openssl.git
+                    GIT_TAG openssl-3.1.3
+                    PREFIX ./openssl
+                    CONFIGURE_COMMAND cd ../openssl && ./Configure
+                    BUILD_COMMAND cd ../openssl && make
+                    INSTALL_COMMAND ""
+                    UPDATE_COMMAND ""
+                   )
+
+set(openssl_SOURCE_DIR ${CMAKE_BINARY_DIR}/openssl/src/openssl)
 
 #
 # make sysmon
@@ -193,6 +206,8 @@ add_custom_target(packages
     COMMAND "${CMAKE_SOURCE_DIR}/makePackages.sh" "${CMAKE_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" "${PACKAGE_NAME}" "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}" "${PROJECT_VERSION_TWEAK}"
     DEPENDS "${CMAKE_SOURCE_DIR}/package" "${PROJECT_BINARY_DIR}/sysmon"
 )
+
+add_dependencies(sysmon openssl)
 
 # list of ebpf programs to make
 set(EBPF_PROGS
@@ -334,7 +349,7 @@ set(EBPF_DEPENDS
 #
 # link sysmon
 #
-target_link_libraries(sysmon sysinternalsEBPF "${LIBXML2_LIBRARIES}" pthread OpenSSL::Crypto)
+target_link_libraries(sysmon sysinternalsEBPF "${LIBXML2_LIBRARIES}" pthread ${openssl_SOURCE_DIR}/libcrypto.a ${CMAKE_DL_LIBS} )
 
 
 #
@@ -403,7 +418,7 @@ add_executable(sysmonUnitTests
                "${PROJECT_BINARY_DIR}/yoursleep"
                )
 
-target_link_libraries(sysmonUnitTests "${LIBXML2_LIBRARIES}" ${GTEST_LIBRARIES} pthread OpenSSL::Crypto)
+target_link_libraries(sysmonUnitTests "${LIBXML2_LIBRARIES}" ${GTEST_LIBRARIES} pthread ${openssl_SOURCE_DIR}/libcrypto.a ${CMAKE_DL_LIBS})
 target_include_directories(sysmonUnitTests PUBLIC
                            "${CMAKE_SOURCE_DIR}"
                            "${SYSMON_COMMON_SOURCE_DIR}"
@@ -548,6 +563,19 @@ add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/sysmon.service"
 # This section specifies the options for building ebpf programs
 #
 
+# There are parts of the build process that needs to run when the CMake file changes.
+# Specifically, the eBPF program compilation. This is done by comparing the hash of
+# the CMake file to the previous hash. If they are different, then the eBPF programs
+# are rebuilt.
+file(MD5 "${CMAKE_CURRENT_LIST_FILE}" CMAKE_FILE_HASH)
+
+set(PREVIOUS_CMAKE_FILE_HASH "")
+if(EXISTS "${PROJECT_BINARY_DIR}/previous_cmake_file_hash.txt")
+    file(READ "${PROJECT_BINARY_DIR}/previous_cmake_file_hash.txt" PREVIOUS_CMAKE_FILE_HASH)
+endif()
+
+file(WRITE "${PROJECT_BINARY_DIR}/previous_cmake_file_hash.txt" "${CMAKE_FILE_HASH}")
+
 # set binaries and options for clang and llc
 set(CLANG "clang")
 set(LLC "llc")
@@ -606,15 +634,15 @@ foreach(EBPF_PROG IN LISTS EBPF_PROGS)
                       DEPENDS "${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c"
                      )
 
-    # test to only build ebpf programs when they have changed
-    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}.o)
+    # test to only build ebpf programs when they have changed or if CMake file has changed.
+    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}.o OR NOT "${CMAKE_FILE_HASH}" STREQUAL "${PREVIOUS_CMAKE_FILE_HASH}")
         # first build NON CORE program
         list(REMOVE_ITEM CLANG_DEFINES -DEBPF_CO_RE)
         build_ebpf(${EBPF_PROG} "")
         set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${EBPF_PROG}.o)
     endif()
 
-    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o)
+    if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}${EBPF_CORE_PROG_SUFFIX}.o OR NOT "${CMAKE_FILE_HASH}" STREQUAL "${PREVIOUS_CMAKE_FILE_HASH}")
         # next build CORE program
         list(APPEND CLANG_DEFINES -DEBPF_CO_RE)
         build_ebpf(${EBPF_PROG} ${EBPF_CORE_PROG_SUFFIX})
