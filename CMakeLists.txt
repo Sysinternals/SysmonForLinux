@@ -634,7 +634,7 @@ foreach(EBPF_PROG IN LISTS EBPF_PROGS)
                       DEPENDS "${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c"
                      )
 
-    # test to only build ebpf programs when they have changed
+    # test to only build ebpf programs when they have changed or if CMake file has changed.
     if(${CMAKE_SOURCE_DIR}/ebpfKern/${EBPF_PROG}.c IS_NEWER_THAN ${CMAKE_BINARY_DIR}/${EBPF_PROG}.o OR NOT "${CMAKE_FILE_HASH}" STREQUAL "${PREVIOUS_CMAKE_FILE_HASH}")
         # first build NON CORE program
         list(REMOVE_ITEM CLANG_DEFINES -DEBPF_CO_RE)
