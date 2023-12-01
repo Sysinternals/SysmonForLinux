@@ -292,17 +292,17 @@ BOOLEAN GetProcess(
 // overflow. We work around this by using memcpy instead.
     if (imagePathLen > 0) {
         //snprintf( ptr, Len, "%s", imagePath );
-        memcpy(ptr, imagePath, sizeof(ptr) * imagePathLen);
+        memcpy(ptr, imagePath, sizeof(CHAR) * imagePathLen);
         ptr += imagePathLen;
     }
     if (cmdlineLen > 0) {
         //snprintf( ptr, cmdlineLen, "%s", cmdline );
-        memcpy(ptr, cmdline, sizeof(ptr) * cmdlineLen);
+        memcpy(ptr, cmdline, sizeof(CHAR) * cmdlineLen);
         ptr += cmdlineLen;
     }
     if (cwdLen > 0) {
         //snprintf( ptr, cwdLen, "%s", cwd );
-        memcpy(ptr, cwd, sizeof(ptr) * cwdLen);
+        memcpy(ptr, cwd, sizeof(CHAR) * cwdLen);
     }
  #pragma GCC diagnostic pop
 
@@ -895,7 +895,7 @@ void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, s
     size_t              n;
     FILE                *filePtr;
     EVP_MD_CTX          *sha1_ctx, *md5_ctx, *sha256_ctx;
-    
+
     // Allocate digests context
     sha1_ctx    = EVP_MD_CTX_new();
     md5_ctx     = EVP_MD_CTX_new();
@@ -950,7 +950,7 @@ void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, s
 
     memset(tmpStringBuffer, 0, sizeof(tmpStringBuffer));
     memset(tmpHashPrefixBuffer, 0, sizeof(tmpHashPrefixBuffer));
-    
+
     for(unsigned int algo=0;algo<ALGO_MAX;algo++){
         if( hashFlag[algo] ){
 
@@ -958,7 +958,7 @@ void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, s
             if( *tmpStringBuffer ){
                 memset(tmpStringBuffer, 0, sizeof(tmpStringBuffer));
                 memset(tmpHashPrefixBuffer, 0, sizeof(tmpHashPrefixBuffer));
-                
+
                 strcat((char *)tmpHashPrefixBuffer, hashSeparator);
             }
 
@@ -979,12 +979,12 @@ void LinuxGetFileHash(uint32_t hashType, PTCHAR imagePath, char *stringBuffer, s
             for(unsigned int i=0;i<hashSize[algo];i++){
                 snprintf((char *)tmpStringBuffer+i*2, sizeof(tmpStringBuffer), "%02x", tmpHashBuffer[algo][i]);
             }
-            
+
             if(stringBufferSize > strnlen((char *)tmpHashPrefixBuffer, sizeof(tmpHashPrefixBuffer)) + strnlen((char *)tmpStringBuffer, sizeof(tmpStringBuffer))){
                 strcat(stringBuffer, (char *)tmpHashPrefixBuffer);
                 strcat(stringBuffer, (char *)tmpStringBuffer);
             }
-            
+
             if( !(hashType & ALGO_MULTIPLE) ) return;
         }
     }
