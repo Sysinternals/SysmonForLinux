@@ -2,9 +2,9 @@ parameters:
 - name: srcFolder
   type: string
   default: ''
-- name: skipStaticAnalysis
+- name: runStaticAnalysis
   type: boolean
-  default: false
+  default: true
 
 steps:
 - script: |
@@ -28,7 +28,7 @@ steps:
       ./diag_script.sh&
     fi
     # -------------------------- TEMP DIAG END ----------------------------------------------------
-    if [ ${{ parameters.skipStaticAnalysis }} == false ]; then
+    if [ ${{ parameters.runStaticAnalysis }} == true ]; then
       rm -rf build && mkdir build && cd build
       scan-build cmake ..
       scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
