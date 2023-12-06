@@ -2,6 +2,9 @@ parameters:
 - name: srcFolder
   type: string
   default: ''
+- name: skipStaticAnalysis
+  type: boolean
+  default: false
 
 steps:
 - script: |
@@ -25,7 +28,11 @@ steps:
       ./diag_script.sh&
     fi
     # -------------------------- TEMP DIAG END ----------------------------------------------------
-    rm -rf build && mkdir build && cd build
-    scan-build cmake ..
-    scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
+    if [ ${{ parameters.skipStaticAnalysis }} == false ]; then
+      rm -rf build && mkdir build && cd build
+      scan-build cmake ..
+      scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
+    else
+      echo "Skipping static code analysis."
+    fi
   displayName: "Static analysis of Sysmon source code"
