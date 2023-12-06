@@ -20,7 +20,6 @@ steps:
   displayName: "Build Sysmon binaries"
 
 - script: |
-    echo "The value of runStaticAnalysis is: ${{ parameters.runStaticAnalysis }}"
     cd ${{ parameters.srcFolder }}
     # -------------------------- TEMP DIAG START ----------------------------------------------------
     if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
@@ -28,7 +27,7 @@ steps:
       ./diag_script.sh&
     fi
     # -------------------------- TEMP DIAG END ----------------------------------------------------
-    if [ ${{ parameters.runStaticAnalysis }} == true ]; then
+    if [ ${{ parameters.runStaticAnalysis }} == True ]; then
       rm -rf build && mkdir build && cd build
       scan-build cmake ..
       scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
