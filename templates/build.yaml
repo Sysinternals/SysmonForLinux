@@ -4,7 +4,6 @@ parameters:
   default: ''
 - name: runStaticAnalysis
   type: boolean
-  default: true
 
 steps:
 - script: |
@@ -21,6 +20,7 @@ steps:
   displayName: "Build Sysmon binaries"
 
 - script: |
+    echo "The value of runStaticAnalysis is: ${{ parameters.runStaticAnalysis }}"
     cd ${{ parameters.srcFolder }}
     # -------------------------- TEMP DIAG START ----------------------------------------------------
     if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
