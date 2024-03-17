@@ -52,5 +52,5 @@ stages:
 
       - template: templates/build.yaml
         parameters:
-          srcFolder: 'SysmonForLinux'
+          srcPath: 'SysmonForLinux'
           runStaticAnalysis: true
