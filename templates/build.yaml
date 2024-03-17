@@ -1,9 +1,10 @@
 parameters:
-- name: srcFolder
+- name: srcPath
   type: string
-  default: ''
+  default: '.'
 - name: runStaticAnalysis
   type: boolean
+  default: False
 
 steps:
 - script: |

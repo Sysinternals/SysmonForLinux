@@ -41,7 +41,7 @@ stages:
 
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
-          srcFolder: 'SysinternalsEBPF'
+          srcPath: 'SysinternalsEBPF'
           runStaticAnalysis: false
 
       - script: |
