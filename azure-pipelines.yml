@@ -45,7 +45,7 @@ stages:
           runStaticAnalysis: false
 
       - script: |
-          cd $(Build.SourcesDirectory)/SysinternalsEBPF/build
+          cd $(Build.SourcesDirectory)/SysinternalsEBPF/sysinternalsEBPF_build
           make install
           ldconfig
         displayName: "Install SysinternalsEBPF"
