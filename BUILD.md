@@ -97,8 +97,13 @@ sudo /opt/sysmon/sysmon -u
 ## Make Packages
 Packages can be generated with:
 ```
-make packages
+make deb
 ```
+or
+```
+make rpm
+```
+
 The directories build/deb and build/rpm will be populated with the required
 files. If dpkg-deb is available, the build/deb directory will be used to create
 a deb package. Similarly if rpmbuild is available, the build/rpm directory will
