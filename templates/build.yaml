@@ -1,26 +1,27 @@
 parameters:
-- name: srcFolder
+- name: srcPath
   type: string
-  default: ''
+  default: '.'
 - name: runStaticAnalysis
   type: boolean
+  default: False
 
 steps:
 - script: |
-    cd ${{ parameters.srcFolder }}
+    cd ${{ parameters.srcPath }}
     # -------------------------- TEMP DIAG START  ----------------------------------------------------
     if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
       echo "Diag script and dotnet-stack found, running in background"
       ./diag_script.sh&
     fi
     # -------------------------- TEMP DIAG END ----------------------------------------------------
-    mkdir build && cd build
+    mkdir sysmon_build && cd sysmon_build
     cmake ..
     make
   displayName: "Build Sysmon binaries"
 
 - script: |
-    cd ${{ parameters.srcFolder }}
+    cd ${{ parameters.srcPath }}
     # -------------------------- TEMP DIAG START ----------------------------------------------------
     if [ -e "diag_script.sh" ] && [ -e "/root/.dotnet/tools/dotnet-stack" ]; then
       echo "Diag script and dotnet-stack found, running in background"
@@ -28,7 +29,7 @@ steps:
     fi
     # -------------------------- TEMP DIAG END ----------------------------------------------------
     if [ ${{ parameters.runStaticAnalysis }} == True ]; then
-      rm -rf build && mkdir build && cd build
+      rm -rf sysmon_build && mkdir sysmon_build && cd sysmon_build
       scan-build cmake ..
       scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
     else

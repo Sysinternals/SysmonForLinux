@@ -41,16 +41,16 @@ stages:
 
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
-          srcFolder: 'SysinternalsEBPF'
+          srcPath: 'SysinternalsEBPF'
           runStaticAnalysis: false
 
       - script: |
-          cd $(Build.SourcesDirectory)/SysinternalsEBPF/build
+          cd $(Build.SourcesDirectory)/SysinternalsEBPF/sysinternalsEBPF_build
           make install
           ldconfig
         displayName: "Install SysinternalsEBPF"
 
       - template: templates/build.yaml
         parameters:
-          srcFolder: 'SysmonForLinux'
+          srcPath: 'SysmonForLinux'
           runStaticAnalysis: true
