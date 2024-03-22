@@ -38,8 +38,8 @@ stages:
       - checkout: SysinternalsEBPF
 
       - script: |
-          chmod +x .container/install-ubuntu-dependencies.sh
-          .container/install-ubuntu-dependencies.sh
+          chmod +x SysmonForLinux/.container/install-ubuntu-dependencies.sh
+          SysmonForLinux/.container/install-ubuntu-dependencies.sh
         displayName: "Install pre-reqs for Ubuntu"
 
       - template: templates/build.yaml@SysinternalsEBPF
