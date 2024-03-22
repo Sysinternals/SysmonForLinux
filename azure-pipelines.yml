@@ -38,7 +38,6 @@ stages:
       - checkout: SysinternalsEBPF
 
       - script: |
-          ls
           chmod +x SysmonForLinux/.container/install-ubuntu-dependencies.sh
           SysmonForLinux/.container/install-ubuntu-dependencies.sh
         displayName: "Install pre-reqs for Ubuntu"
@@ -50,8 +49,8 @@ stages:
 
       - script: |
           cd $(Build.SourcesDirectory)/SysinternalsEBPF/sysinternalsEBPF_build
-          make install
-          ldconfig
+          sudo make install
+          sudo ldconfig
         displayName: "Install SysinternalsEBPF"
 
       - template: templates/build.yaml
