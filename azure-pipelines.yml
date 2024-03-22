@@ -29,15 +29,18 @@ stages:
    jobs:
     - job: "Build_Sysmon_Ubuntu"
       pool:
-        name: "Sysinternals-for-Linux-AME"
-        demands:
-        - ImageOverride -equals sysmon-ubuntu-build-agent
+        vmImage: "ubuntu-20.04"
       timeoutInMinutes: 240
       steps:
       - checkout: self
         submodules: true
 
       - checkout: SysinternalsEBPF
+
+      - script: |
+          chmod +x SysmonForLinux/.container/install-ubuntu-dependencies.sh
+          SysmonForLinux/.container/install-ubuntu-dependencies.sh
+        displayName: "Install pre-reqs for Ubuntu"
 
       - template: templates/build.yaml@SysinternalsEBPF
         parameters:
@@ -46,8 +49,8 @@ stages:
 
       - script: |
           cd $(Build.SourcesDirectory)/SysinternalsEBPF/sysinternalsEBPF_build
-          make install
-          ldconfig
+          sudo make install
+          sudo ldconfig
         displayName: "Install SysinternalsEBPF"
 
       - template: templates/build.yaml

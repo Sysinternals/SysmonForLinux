@@ -1,0 +1,6 @@
+FROM mcr.microsoft.com/mirror/docker/library/ubuntu:20.04
+
+# Install dependencies
+COPY install-ubuntu-dependencies.sh /usr/local/bin/install_dependencies.sh
+RUN chmod +x /usr/local/bin/install_dependencies.sh && \
+    /usr/local/bin/install_dependencies.sh
