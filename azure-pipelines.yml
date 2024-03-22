@@ -38,6 +38,7 @@ stages:
       - checkout: SysinternalsEBPF
 
       - script: |
+          ls
           chmod +x SysmonForLinux/.container/install-ubuntu-dependencies.sh
           SysmonForLinux/.container/install-ubuntu-dependencies.sh
         displayName: "Install pre-reqs for Ubuntu"
