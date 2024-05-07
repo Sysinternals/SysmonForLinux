@@ -15,12 +15,16 @@
 [Unit]
 Description=Sysmon event logger
 After=syslog.service
+StartLimitBurst=5
+StartLimitIntervalSec=90
 
 [Service]
 Type=forking
 User=root
 WorkingDirectory=/opt/sysmon
 ExecStart=/opt/sysmon/sysmon -i /opt/sysmon/config.xml -service
+Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
