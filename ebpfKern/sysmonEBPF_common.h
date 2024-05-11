@@ -35,6 +35,7 @@
 
 #ifdef EBPF_CO_RE
 #include "vmlinux.h"
+#include "vmlinux_kern_diffs.h"
 #else
 #include <linux/version.h>
 #include <linux/bpf.h>

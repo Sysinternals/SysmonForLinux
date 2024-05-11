@@ -111,12 +111,45 @@ static inline char* set_FileOpen_info(
     inode = derefInodeFromFd(task, eventArgs->returnCode, config);
     if (inode) {
 #ifdef EBPF_CO_RE
-        event->m_atime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_atime.tv_sec);
-        event->m_atime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_atime.tv_nsec);
-        event->m_mtime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_mtime.tv_sec);
-        event->m_mtime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_mtime.tv_nsec);
-        event->m_ctime.tv_sec = BPF_CORE_READ((struct inode *)inode, i_ctime.tv_sec);
-        event->m_ctime.tv_nsec = BPF_CORE_READ((struct inode *)inode, i_ctime.tv_nsec);
+        if(bpf_core_field_exists(((struct inode*)inode)->__i_atime))
+        {
+            // Post 6.6 kernel i_atime was renamed to __i_atime
+            event->m_atime.tv_sec = BPF_CORE_READ((struct inode *)inode, __i_atime.tv_sec);
+            event->m_atime.tv_nsec = BPF_CORE_READ((struct inode *)inode, __i_atime.tv_nsec);
+        }
+        else
+        {
+            struct inode___pre_v66* in_pre_v66 = (struct inode___pre_v66*)inode;
+            event->m_atime.tv_sec = BPF_CORE_READ(in_pre_v66, i_atime.tv_sec);
+            event->m_atime.tv_nsec = BPF_CORE_READ(in_pre_v66, i_atime.tv_nsec);
+        }
+
+        if(bpf_core_field_exists(((struct inode*)inode)->__i_mtime))
+        {
+            // Post 6.6 kernel i_mtime was renamed to __i_mtime
+            event->m_mtime.tv_sec = BPF_CORE_READ((struct inode *)inode, __i_mtime.tv_sec);
+            event->m_mtime.tv_nsec = BPF_CORE_READ((struct inode *)inode, __i_mtime.tv_nsec);
+        }
+        else
+        {
+            struct inode___pre_v66* in_pre_v66 = (struct inode___pre_v66*)inode;
+            event->m_mtime.tv_sec = BPF_CORE_READ(in_pre_v66, i_mtime.tv_sec);
+            event->m_mtime.tv_nsec = BPF_CORE_READ(in_pre_v66, i_mtime.tv_nsec);
+        }
+
+        if(bpf_core_field_exists(((struct inode*)inode)->__i_ctime))
+        {
+            // Post 6.6 kernel i_ctime was renamed to __i_ctime
+            event->m_ctime.tv_sec = BPF_CORE_READ((struct inode *)inode, __i_ctime.tv_sec);
+            event->m_ctime.tv_nsec = BPF_CORE_READ((struct inode *)inode, __i_ctime.tv_nsec);
+        }
+        else
+        {
+            struct inode___pre_v66* in_pre_v66 = (struct inode___pre_v66*)inode;
+            event->m_ctime.tv_sec = BPF_CORE_READ(in_pre_v66, i_ctime.tv_sec);
+            event->m_ctime.tv_nsec = BPF_CORE_READ(in_pre_v66, i_ctime.tv_nsec);
+        }
+
         event->m_Mode = BPF_CORE_READ((struct inode *)inode, i_mode);
 #else
         bpf_probe_read(&event->m_atime, sizeof(event->m_atime), inode + config->offsets.inode_atime[0]);

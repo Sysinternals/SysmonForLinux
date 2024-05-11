@@ -3054,9 +3054,9 @@ struct inode {
 	};
 	dev_t i_rdev;
 	loff_t i_size;
-	struct timespec64 i_atime;
-	struct timespec64 i_mtime;
-	struct timespec64 i_ctime;
+	struct timespec64 __i_atime;
+	struct timespec64 __i_mtime;
+	struct timespec64 __i_ctime;
 	spinlock_t i_lock;
 	short unsigned int i_bytes;
 	u8 i_blkbits;
