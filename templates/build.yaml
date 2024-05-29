@@ -7,7 +7,7 @@ parameters:
   default: False
 - name: builddir
   type: string
-  default: 'build'  
+  default: 'build'
 
 steps:
 - script: |
@@ -19,7 +19,7 @@ steps:
 - script: |
     cd ${{ parameters.srcPath }}
     if [ ${{ parameters.runStaticAnalysis }} == True ]; then
-      rm -rf ${{ parameters.srcPath }}/${{ parameters.builddir }} && mkdir ${{ parameters.srcPath }}/${{ parameters.builddir }} && cd ${{ parameters.srcPath }}/${{ parameters.builddir }}
+      rm -rf ${{ parameters.srcPath }}/${{ parameters.builddir }} && mkdir -p ${{ parameters.srcPath }}/${{ parameters.builddir }} && cd ${{ parameters.srcPath }}/${{ parameters.builddir }}
       scan-build cmake ..
       scan-build -v --status-bugs -o verifier_result --exclude ../test --exclude openssl -disable-checker cplusplus.NewDelete,cplusplus.NewDeleteLeaks make
     else
