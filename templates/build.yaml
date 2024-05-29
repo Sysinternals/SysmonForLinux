@@ -17,7 +17,6 @@ steps:
   displayName: "Build Sysmon binaries"
 
 - script: |
-    cd ${{ parameters.srcPath }}
     if [ ${{ parameters.runStaticAnalysis }} == True ]; then
       rm -rf ${{ parameters.srcPath }}/${{ parameters.builddir }} && mkdir -p ${{ parameters.srcPath }}/${{ parameters.builddir }} && cd ${{ parameters.srcPath }}/${{ parameters.builddir }}
       scan-build cmake ..
