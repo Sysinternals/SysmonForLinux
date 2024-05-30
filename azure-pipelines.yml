@@ -46,6 +46,7 @@ stages:
         parameters:
           srcPath: 'SysinternalsEBPF'
           runStaticAnalysis: false
+          builddir: 'sysinternalsEBPF_build'
 
       - script: |
           cd $(Build.SourcesDirectory)/SysinternalsEBPF/sysinternalsEBPF_build
@@ -57,3 +58,4 @@ stages:
         parameters:
           srcPath: 'SysmonForLinux'
           runStaticAnalysis: true
+          builddir: 'sysinternalsEBPF_build'
